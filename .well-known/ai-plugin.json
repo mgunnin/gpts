@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "LaraGPT",
+  "name_for_model": "laraGPT",
+  "description_for_human": "The most advanced AI Agent for League of Legends gamers around the world.",
+  "description_for_model": "Get current and historical stats for the user. Requests their League of Legends summoner name. Always display stats in table format",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://lacra-gpt-lol.replit.app/openapi.yaml"
+  },
+  "logo_url": "https://lacra-gpt-lol.replit.app/logo.png",
+  "contact_email": "support@esportsone.com",
+  "legal_info_url": "https://esportsone.com/legal"
+}

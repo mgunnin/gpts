@@ -1,0 +1,14 @@
+{
+  "LOL_API_KEY": "RGAPI-de85bb37-76e5-6890-9a94-fcf7b1bf14a6",
+  "DATABASE": {
+    "HOST": "localhost",
+    "PORT": 5432,
+    "USER": "admin",
+    "PASSWORD": "password",
+    "DB_NAME": "mattgunnin"
+  },
+  "CHATGPT": {
+    "MODEL_NAME": "gpt-4",
+    "TOKEN": "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"
+  }
+}
