@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import router
+from routes.lol_watcher import watcher_router as watcher_router
+from routes.routes import router
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ if not RIOT_API_KEY:
 
 app = FastAPI()
 app.include_router(router)
+app.include_router(watcher_router)
 
 # Set up CORS middleware
 origins = [

@@ -1,10 +1,13 @@
 import os
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 
-from models import SummonerData
+from models import MassRegion, SummonerData
 from utils import get_api_response
+
+load_dotenv()
 
 router = APIRouter()
 
@@ -67,34 +70,31 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
         "puuid": response.get("puuid")
     }
 
-# FastAPI route to get match IDs using puuid
+# Route to get match IDs using puuid
 @router.get("/matches/by-puuid/{puuid}")
-async def get_match_ids(puuid: str, mass_region: str, no_games: int):
-    if mass_region not in MASS_REGIONS:
-        raise HTTPException(status_code=400, detail="Invalid mass region")
+async def get_match_ids(puuid: str, no_games: int, mass_region: MassRegion = MassRegion.americas):
 
     route = RIOT_API_ROUTES["match_by_puuid"].format(puuid=puuid)
-    RIOT_API_URL = f"https://{mass_region}.{RIOT_API_BASE_URL}{route}"
+    RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}?start=0&count={no_games}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     match_ids = await get_api_response(RIOT_API_URL, headers)
 
-    # Return only the number of games requested
-    return match_ids[:no_games]
+    return match_ids
 
 
-# FastAPI route to get match data using match ID
+# Route to get match data using match ID
 @router.get("/match_data/{match_id}")
-async def get_match_data(match_id: str, mass_region: str):
+async def get_match_data(match_id: str, mass_region: MassRegion = MassRegion.americas):
     route = RIOT_API_ROUTES["match_by_id"].format(matchId=match_id)
-    RIOT_API_URL = f"https://{mass_region}.{RIOT_API_BASE_URL}{route}"
+    RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     return await get_api_response(RIOT_API_URL, headers)
 
 # Gather all data
 @router.get("/player_data/{match_id}/{puuid}")
-async def find_player_data(match_id: str, puuid: str, mass_region: str):
+async def find_player_data(match_id: str, puuid: str, mass_region: MassRegion = MassRegion.americas):
     route = RIOT_API_ROUTES["match_by_id"].format(matchId=match_id)
-    RIOT_API_URL = f"https://{mass_region}.{RIOT_API_BASE_URL}{route}"
+    RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     match_data = await get_api_response(RIOT_API_URL, headers)
     participants = match_data['metadata']['participants']
@@ -103,17 +103,24 @@ async def find_player_data(match_id: str, puuid: str, mass_region: str):
     return player_data
 
 @router.get("/gather_all_data/{puuid}/{no_games}")
-async def gather_all_data(puuid: str, no_games: int, mass_region: str):
+async def gather_all_data(puuid: str, no_games: int, mass_region: MassRegion = MassRegion.americas):
     # Get match_ids for the number of games requested
-    match_ids = await get_match_ids(puuid, mass_region, no_games)
+    match_ids = await get_match_ids(puuid, no_games, mass_region)
 
     # We initialise an empty dictionary to store data for each game
     data = {
         'champion': [],
+        'champLevel': [],
         'kills': [],
         'deaths': [],
         'assists': [],
-        'win': []
+        'win': [],
+        'teamposition': [],
+        'role': [],
+        'timeplayed': [],
+        'totaldamagedealt': [],
+        'goldearned': [],
+        'goldspent': []
     }
 
     for match_id in match_ids:
@@ -121,19 +128,38 @@ async def gather_all_data(puuid: str, no_games: int, mass_region: str):
         await get_match_data(match_id, mass_region)
         player_data = await find_player_data(match_id, puuid, mass_region)
 
-        # assign the variables we're interested in
+        # Core Stats Variables
         champion = player_data['championName']
+        champLevel = player_data['champLevel']
         k = player_data['kills']
         d = player_data['deaths']
         a = player_data['assists']
         win = player_data['win']
 
-        # add them to our dataset
+        #Secondary Stats Variables
+        teamPosition = player_data['teamPosition']
+        role = player_data['role']
+        timePlayed = player_data['timePlayed'] / 60
+        totalDamageDealt = player_data['totalDamageDealt']
+        goldEarned = player_data['goldEarned']
+        goldSpent = player_data['goldSpent']
+
+        # Core Stats
         data['champion'].append(champion)
+        data['champLevel'].append(champLevel)
         data['kills'].append(k)
         data['deaths'].append(d)
         data['assists'].append(a)
         data['win'].append(win)
+
+        # Secondary Stats
+        data['teamposition'].append(teamPosition)
+        data['role'].append(role)
+        data['timeplayed'].append(timePlayed)
+        data['totaldamagedealt'].append(totalDamageDealt)
+        data['goldearned'].append(goldEarned)
+        data['goldspent'].append(goldSpent)
+
 
     return data
 
@@ -169,7 +195,7 @@ async def analyze_player_data(data):
 
 # FastAPI route to get all data
 @router.get("/master_function/{summoner_name}/{mass_region}/{no_games}")
-async def master_function(request: Request, mass_region: str, no_games: int):
+async def master_function(request: Request, no_games: int, mass_region: MassRegion = MassRegion.americas):
     # Get puuid for the summoner name
     puuid = request.session.get("puuid")
 
@@ -196,6 +222,8 @@ async def analyze_match_history(summoner_data: SummonerData):
     total_heal = sum(participant.total_heal for match in summoner_data.matches for participant in match.participants)
     total_damage_dealt_to_champions = sum(participant.total_damage_dealt_to_champions for match in summoner_data.matches for participant in match.participants)
     total_vision_score = sum(participant.vision_score for match in summoner_data.matches for participant in match.participants)
+    total_gold_earned = sum(participant.gold_earned for match in summoner_data.matches for participant in match.participants)
+    total_gold_spent = sum(participant.gold_spent for match in summoner_data.matches for participant in match.participants)
 
     return {
         "total_matches": total_matches,
@@ -208,6 +236,8 @@ async def analyze_match_history(summoner_data: SummonerData):
         "average_heal": total_heal / total_matches,
         "average_damage_dealt_to_champions": total_damage_dealt_to_champions / total_matches,
         "average_vision_score": total_vision_score / total_matches,
+        "average_gold_earned": total_gold_earned / total_matches,
+        "average_gold_spent": total_gold_spent / total_matches,
     }
 
 @router.get("/")

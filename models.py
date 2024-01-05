@@ -1,7 +1,14 @@
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel, Field
 
+
+class MassRegion(str, Enum):
+    americas = "americas"
+    europe = "europe"
+    asia = "asia"
+    sea = "sea"
 
 class PlayerStats(BaseModel):
     assists: int = Field(..., description="Number of assists made by the player")
@@ -13,6 +20,9 @@ class PlayerStats(BaseModel):
     total_heal: int = Field(..., description="Total healing done by the player")
     total_damage_dealt_to_champions: int = Field(..., description="Total damage dealt to champions by the player")
     vision_score: int = Field(..., description="Vision score of the player")
+    wards_placed: int = Field(..., description="Number of wards placed by the player")
+    gold_earned: int = Field(..., description="Total gold earned by the player")
+    gold_spent: int = Field(..., description="Total gold spent by the player")
 
 class Match(BaseModel):
     game_id: int = Field(..., description="Game ID")
