@@ -1,1 +1,4 @@
-{}
+{
+  "git.ignoreLimitWarning": true,
+  "python.analysis.typeCheckingMode": "basic",
+}

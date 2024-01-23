@@ -41,3 +41,4 @@ class Match(BaseModel):
 
 class SummonerData(BaseModel):
     matches: List[Match] = Field(..., description="List of matches")
+    

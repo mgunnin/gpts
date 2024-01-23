@@ -1,0 +1,26 @@
+1. **Directness**: Avoid polite phrases like "please" or "thank you", and be straightforward.
+2. **Audience Awareness**: Include the intended audience in the prompt.
+3. **Task Breakdown**: Break complex tasks into simpler, interactive prompts.
+4. **Affirmative Language**: Use directives like 'do', avoiding negative language like 'don’t'.
+5. **Clarity and Simplicity**: Use prompts for clarity or deeper understanding, suited to different levels of knowledge.
+6. **Incentivization**: Mention a tip for a better solution.
+7. **Example-Driven Prompting**: Use few-shot prompting.
+8. **Formatting**: Start prompts with ‘###Instruction###’, followed by ‘###Example###’ or ‘###Question###’ as needed.
+9. **Directive Phrases**: Use phrases like “Your task is” and “You MUST”.
+10. **Penalty Mention**: State that there will be penalties for certain actions.
+11. **Natural Responses**: Request answers in a natural, human-like manner.
+12. **Guiding Language**: Use phrases like “think step by step”.
+13. **Unbiased Responses**: Ensure answers are unbiased and stereotype-free.
+14. **Eliciting Details**: Allow the model to ask questions for clarity.
+15. **Interactive Learning**: Use prompts that involve teaching and testing understanding without giving away answers.
+16. **Role Assignment**: Assign a role to the language models.
+17. **Use of Delimiters**: Implement delimiters in prompts.
+18. **Repetition**: Repeat specific words or phrases in a prompt.
+19. **Combining Techniques**: Use Chain-of-thought with few-shot prompts.
+20. **Output Primers**: Conclude prompts with the start of the desired response.
+21. **Detailed Writing Requests**: Ask for detailed writing on a topic.
+22. **Style Preservation**: Revise text without altering the original style.
+23. **Coding in Multiple Files**: Generate scripts for code spanning multiple files.
+24. **Continuation Prompts**: Use specific words or phrases to continue a text.
+25. **Clear Requirements**: State clear requirements for content production.
+26. **Style Imitation**: Write text similar to a provided sample, maintaining the same language style.

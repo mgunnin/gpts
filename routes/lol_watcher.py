@@ -2,11 +2,12 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import APIRouter
-from riotwatcher import LolWatcher
+from riotwatcher import LolWatcher, RiotWatcher
 
 load_dotenv()
 
-lol_watcher = LolWatcher('RGAPI-de85bb37-76e5-6890-9a94-fcf7b1bf14a6')
+riot_watcher = RiotWatcher("RIOT_API_KEY")
+lol_watcher = LolWatcher("RIOT_API_KEY")
 region = 'na1'
 mass_region = 'americas'
 
@@ -175,3 +176,27 @@ async def analyze_matches(summoner_name: str, region: str = "na1"):
         average_lane_minions_first10_minutes=average_lane_minions_first10_minutes,
         average_gold_per_minute=average_gold_per_minute
     )
+
+@watcher_router.get('/lol_watcher/analyze_match')
+async def analyze_match(match_id: str, region: str = "na1"):
+    match_details = lol_watcher.match.by_id(region, match_id)
+    participants = match_details['info']['participants']
+    participants_data = []
+    for participant in participants:
+        participants_data.append(dict(
+            summoner_name=participant['summonerName'],
+            champion_name=participant['championName'],
+            win=participant['win'],
+            kills=participant['kills'],
+            deaths=participant['deaths'],
+            assists=participant['assists'],
+            gold_earned=participant['goldEarned'],
+            total_damage=participant['totalDamageDealtToChampions'],
+            vision_score=participant['visionScore'],
+            turret_kills=participant['turretKills'],
+            dragon_kills=participant['dragonKills'],
+            baron_kills=participant['baronKills'],
+            riftHerald_takedowns=participant['challenges']['riftHeraldTakedowns'],
+            lane_minions_first10_minutes=participant['challenges']['laneMinionsFirst10Minutes'],
+            gold_per_minute=participant['challenges']['goldPerMinute'],
+        ))

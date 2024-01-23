@@ -1,0 +1,444 @@
+openapi: 3.1.0
+info:
+  version: "0.0.1"
+  title: League of Legends Stats and Coaching
+  description: This plugin retrieves a player's match history and provides analysis and coaching tips to improve their gameplay in League of Legends.
+servers:
+  - url: https://lacra-gpt-lol.replit.app
+  - url: "https://{platform}.api.riotgames.com"
+    variables:
+      platform:
+        description: Server mass regions
+        default: americas
+        enum:
+          - americas
+          - asia
+          - esports
+          - europe
+          - br1
+          - eun1
+          - euw1
+          - jp1
+          - kr
+          - la1
+          - la2
+          - na1
+          - oc1
+          - ph2
+          - ru
+          - sg2
+          - th2
+          - tr1
+          - tw2
+          - vn2
+          - pbe1
+          - sea
+          - apac
+          - ap
+          - br
+          - eu
+          - latam
+          - na
+paths:
+  /summoner/{summoner_name}:
+    get:
+      tags:
+        - Summoner Info
+      operationId: getSummonerInfo
+      summary: Get summoner information by name
+      description: Retrieves summoner information using the summoner's name.
+      parameters:
+        - name: summoner_name
+          in: path
+          description: The name of the summoner
+          required: true
+          schema:
+            $ref: "#/components/schemas/SummonerName"
+        - name: region
+          in: query
+          description: The region in which the summoner is located
+          required: true
+          schema:
+            $ref: "#/components/schemas/Region"
+      responses:
+        "200":
+          description: Successfully retrieved summoner info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummonerInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /matches/by-puuid/{puuid}:
+    get:
+      tags:
+        - Match IDs
+      operationId: getMatchIds
+      summary: Get match IDs using summoner's PUUID
+      description: Retrieves match IDs using the summoner's PUUID for detailed match analysis.
+      parameters:
+        - name: puuid
+          in: path
+          description: The PUUID of the summoner
+          required: true
+          schema:
+            $ref: "#/components/schemas/Puuid"
+        - name: mass_region
+          in: query
+          description: The mass region to query for match IDs
+          required: true
+          schema:
+            $ref: "#/components/schemas/MassRegion"
+        - name: no_games
+          in: query
+          description: The number of games to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: An array of match IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /match_data/{match_id}:
+    get:
+      tags:
+        - Match Data
+      operationId: getMatchData
+      summary: Get match data using match ID
+      description: Retrieves detailed match data using a specific match ID.
+      parameters:
+        - name: match_id
+          in: path
+          description: The match ID to retrieve data for
+          required: true
+          schema:
+            type: string
+        - name: mass_region
+          in: query
+          description: The mass region to query for match data
+          required: true
+          schema:
+            $ref: "#/components/schemas/MassRegion"
+      responses:
+        "200":
+          description: A JSON object containing detailed match data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchData"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /gather_all_data/{puuid}/{no_games}:
+    get:
+      tags:
+        - Gather All Data
+      operationId: gatherAllData
+      summary: Gather all data for a summoner
+      description: Gathers all match data for a summoner for a specified number of games.
+      parameters:
+        - name: puuid
+          in: path
+          description: The PUUID of the summoner
+          required: true
+          schema:
+            $ref: "#/components/schemas/Puuid"
+        - name: no_games
+          in: path
+          description: The number of games to gather data for
+          required: true
+          schema:
+            type: integer
+        - name: mass_region
+          in: query
+          description: The mass region to query for match data
+          required: true
+          schema:
+            $ref: "#/components/schemas/MassRegion"
+      responses:
+        "200":
+          description: A JSON object containing gathered data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  champion:
+                    type: array
+                    items:
+                      type: string
+                  kills:
+                    type: array
+                    items:
+                      type: integer
+                  deaths:
+                    type: array
+                    items:
+                      type: integer
+                  assists:
+                    type: array
+                    items:
+                      type: integer
+                  win:
+                    type: array
+                    items:
+                      type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /analyze_match_data:
+    post:
+      tags:
+        - Match Analysis
+      operationId: analyzeMatchData
+      summary: Analyze match data
+      description: Provides analysis and coaching based on the summoner's match history.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SummonerData"
+      responses:
+        "200":
+          description: A JSON object containing analysis results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+components:
+  responses:
+    BadRequest:
+      description: Bad request, invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+    SummonerName:
+      type: string
+      pattern: "^[0-9a-zA-Z_]{3,16}$"
+    SummonerInfo:
+      type: object
+      required:
+        - puuid
+      properties:
+        summonerName:
+          type: string
+        puuid:
+          type: string
+        id:
+          type: string
+        accountId:
+          type: string
+        profileIconId:
+          type: integer
+        revisionDate:
+          type: integer
+        summonerLevel:
+          type: integer
+    Region:
+      type: string
+      default: "na1"
+      enum:
+        [
+          "na1",
+          "euw1",
+          "eun1",
+          "kr",
+          "br1",
+          "jp1",
+          "ru",
+          "oc1",
+          "tr1",
+          "la1",
+          "la2",
+        ]
+    MassRegion:
+      type: string
+      default: "americas"
+      enum: ["americas", "asia", "europe"]
+    Puuid:
+      type: string
+      pattern: "^[0-9a-fA-F-]{36}$"
+    Matches:
+      type: object
+      properties:
+        matchId:
+          type: string
+        timestamp:
+          type: integer
+        champion:
+          type: string
+        role:
+          type: string
+        lane:
+          type: string
+    MatchIdList:
+      type: array
+      items:
+        type: string
+    MatchData:
+      type: object
+      properties:
+        gameId:
+          type: integer
+          description: The game ID
+        platformId:
+          type: string
+          description: The platform ID the match was played on
+        gameCreation:
+          type: integer
+          description: The creation time of the game
+        gameDuration:
+          type: integer
+          description: The duration of the game in seconds
+        queueId:
+          type: integer
+          description: The queue type of the match
+        mapId:
+          type: integer
+          description: The map where the match was played
+        seasonId:
+          type: integer
+          description: The season when the match was played
+        gameVersion:
+          type: string
+          description: The version of the game
+        gameMode:
+          type: string
+          description: The game mode
+        gameType:
+          type: string
+          description: The game type
+        participants:
+          type: array
+          items:
+            type: object
+          description: The list of participants in the match
+    AnalysisSummary:
+      type: object
+      properties:
+        analysis_summary:
+          type: string
+        win_rate:
+          type: number
+        avg_kills:
+          type: number
+        avg_deaths:
+          type: number
+        avg_assists:
+          type: number
+        avg_wards_placed:
+          type: number
+        avg_cs:
+          type: number
+        avg_gold:
+          type: number
+        avg_cs_per_min:
+          type: number
+        avg_gold_per_min:
+          type: number
+    PlayerStats:
+      type: object
+      properties:
+        assists:
+          type: integer
+        deaths:
+          type: integer
+        kills:
+          type: integer
+        goldPerMinute:
+          type: number
+        damagePerMinute:
+          type: number
+        killParticipation:
+          type: number
+        totalHeal:
+          type: integer
+        totalDamageDealtToChampions:
+          type: integer
+        visionScore:
+          type: integer
+    SummonerData:
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/Match"
+    Match:
+      type: object
+      properties:
+        gameId:
+          type: integer
+        platformId:
+          type: string
+        gameCreation:
+          type: integer
+        gameDuration:
+          type: integer
+        queueId:
+          type: integer
+        mapId:
+          type: integer
+        seasonId:
+          type: integer
+        gameVersion:
+          type: string
+        gameMode:
+          type: string
+        gameType:
+          type: string
+        teams:
+          type: array
+          items:
+            type: object
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlayerStats"
+        participantIdentities:
+          type: array
+          items:
+            type: object

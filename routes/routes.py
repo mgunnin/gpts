@@ -39,6 +39,16 @@ QUEUE_TYPE_ROUTES = {
 # Get summoner info using summoner name
 @router.get("/summoner/{summoner_name}")
 async def get_summoner_info(summoner_name: str, region: str = "na1"):
+    """
+    This endpoint retrieves the summoner information for a given summoner name and region.
+
+    Parameters:
+    summoner_name (str): The name of the summoner.
+    region (str, optional): The region where the summoner is located. Defaults to "na1".
+
+    Returns:
+    dict: A dictionary containing the summoner name, region, mass region, and puuid.
+    """
     RIOT_API_KEY = os.getenv("RIOT_API_KEY")
     if region not in REGIONS:
         raise HTTPException(status_code=400, detail="Invalid region")
@@ -74,6 +84,17 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
 @router.get("/matches/by-puuid/{puuid}")
 async def get_match_ids(puuid: str, no_games: int, mass_region: MassRegion = MassRegion.americas):
 
+    """
+    This endpoint retrieves the match IDs for a given puuid and mass region.
+
+    Parameters:
+    puuid (str): The puuid of the summoner.
+    no_games (int): The number of games to retrieve.
+    mass_region (MassRegion, optional): The mass region where the summoner is located. Defaults to MassRegion.americas.
+
+    Returns:
+    list: A list containing the match IDs.
+    """
     route = RIOT_API_ROUTES["match_by_puuid"].format(puuid=puuid)
     RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}?start=0&count={no_games}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
@@ -85,6 +106,16 @@ async def get_match_ids(puuid: str, no_games: int, mass_region: MassRegion = Mas
 # Route to get match data using match ID
 @router.get("/match_data/{match_id}")
 async def get_match_data(match_id: str, mass_region: MassRegion = MassRegion.americas):
+    """
+    This endpoint retrieves the match data for a given match ID and mass region.
+
+    Parameters:
+    match_id (str): The match ID of the game.
+    mass_region (MassRegion, optional): The mass region where the game was played. Defaults to MassRegion.americas.
+
+    Returns:
+    dict: A dictionary containing the match data.
+    """
     route = RIOT_API_ROUTES["match_by_id"].format(matchId=match_id)
     RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
@@ -93,6 +124,17 @@ async def get_match_data(match_id: str, mass_region: MassRegion = MassRegion.ame
 # Gather all data
 @router.get("/player_data/{match_id}/{puuid}")
 async def find_player_data(match_id: str, puuid: str, mass_region: MassRegion = MassRegion.americas):
+    """
+    This endpoint retrieves the player data for a given match ID, puuid and mass region.
+
+    Parameters:
+    match_id (str): The match ID of the game.
+    puuid (str): The puuid of the summoner.
+    mass_region (MassRegion, optional): The mass region where the game was played. Defaults to MassRegion.americas.
+
+    Returns:
+    dict: A dictionary containing the player data.
+    """
     route = RIOT_API_ROUTES["match_by_id"].format(matchId=match_id)
     RIOT_API_URL = f"https://{mass_region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
@@ -104,6 +146,17 @@ async def find_player_data(match_id: str, puuid: str, mass_region: MassRegion = 
 
 @router.get("/gather_all_data/{puuid}/{no_games}")
 async def gather_all_data(puuid: str, no_games: int, mass_region: MassRegion = MassRegion.americas):
+    """
+    This endpoint retrieves all the data for a given puuid and number of games in a specific mass region.
+
+    Parameters:
+    puuid (str): The puuid of the summoner.
+    no_games (int): The number of games to retrieve data for.
+    mass_region (MassRegion, optional): The mass region where the games were played. Defaults to MassRegion.americas.
+
+    Returns:
+    dict: A dictionary containing the data for each game.
+    """
     # Get match_ids for the number of games requested
     match_ids = await get_match_ids(puuid, no_games, mass_region)
 
@@ -166,6 +219,15 @@ async def gather_all_data(puuid: str, no_games: int, mass_region: MassRegion = M
 # Analyze the gathered data
 @router.get("/analyze_player_data/{data}")
 async def analyze_player_data(data):
+    """
+    This endpoint analyzes the data for a given summoner.
+
+    Parameters:
+    data (dict): The data to analyze.
+
+    Returns:
+    dict: A dictionary containing the analysis results.
+    """
     # Initialize variables to store total stats
     total_kills = 0
     total_deaths = 0
@@ -193,22 +255,17 @@ async def analyze_player_data(data):
         'win_rate': win_rate,
     }
 
-# FastAPI route to get all data
-@router.get("/master_function/{summoner_name}/{mass_region}/{no_games}")
-async def master_function(request: Request, no_games: int, mass_region: MassRegion = MassRegion.americas):
-    # Get puuid for the summoner name
-    puuid = request.session.get("puuid")
-
-    # Gather data for each match
-    data = await gather_all_data(puuid, no_games, mass_region)
-
-    # Analyze the gathered data
-    analysis_results = await analyze_player_data(data)
-
-    return analysis_results
-
 @router.post("/analyze_match_data")
 async def analyze_match_history(summoner_data: SummonerData):
+    """
+    This endpoint analyzes the match history for a given summoner.
+
+    Parameters:
+    summoner_data (SummonerData): The data of the summoner whose match history is to be analyzed.
+
+    Returns:
+    dict: A dictionary containing the analysis results.
+    """
     if not summoner_data.matches:
         return {"error": "No match data available"}
 
