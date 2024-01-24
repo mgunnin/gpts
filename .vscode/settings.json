@@ -1,4 +1,12 @@
 {
   "git.ignoreLimitWarning": true,
   "python.analysis.typeCheckingMode": "basic",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "cloudcode.duetAI.inlineSuggestions.enableAuto": false,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 }

@@ -1,3 +1,4 @@
 /.env
 /tools/gpt-crawler
 /reference
+/routes/__pycache__

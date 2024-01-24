@@ -3,6 +3,13 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+class Region(str, Enum):
+    na1 = "na1"
+    br1 = "br1"
+    eun1 = "eun1"
+    euw1 = "euw1"
+    jp1 = "jp1"
+    kr = "kr"
 
 class MassRegion(str, Enum):
     americas = "americas"
@@ -41,4 +48,14 @@ class Match(BaseModel):
 
 class SummonerData(BaseModel):
     matches: List[Match] = Field(..., description="List of matches")
-    
+    summoner_name: str = Field(..., description="Summoner name")
+    summoner_id: str = Field(..., description="Summoner ID")
+    account_id: str = Field(..., description="Account ID")
+    puuid: str = Field(..., description="PUUID")
+    region: str = Field(..., description="Region")
+    tier: str = Field(..., description="Tier")
+    rank: str = Field(..., description="Rank")
+    league_points: int = Field(..., description="League points")
+    wins: int = Field(..., description="Wins")
+    losses: int = Field(..., description="Losses")
+    win_rate: float = Field(..., description="Win rate")

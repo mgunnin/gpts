@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 
-from models import MassRegion, SummonerData
+from models import Region, MassRegion, SummonerData
 from utils import get_api_response
 
 load_dotenv()
@@ -14,7 +14,7 @@ router = APIRouter()
 # Constants
 OPENAPI_API_URL = os.getenv("OPENAPI_API_URL")
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
-RIOT_API_BASE_URL = "api.riotgames.com"
+RIOT_API_BASE_URL = "api.riotgames.com" 
 REGIONS = ["na1", "br1", "eun1", "euw1", "jp1", "kr"]
 MASS_REGIONS = ["americas", "europe", "asia", "sea"]
 RIOT_API_ROUTES = {
@@ -36,22 +36,11 @@ QUEUE_TYPE_ROUTES = {
     "tourney": "tourney"
 }
 
+
 # Get summoner info using summoner name
 @router.get("/summoner/{summoner_name}")
-async def get_summoner_info(summoner_name: str, region: str = "na1"):
-    """
-    This endpoint retrieves the summoner information for a given summoner name and region.
-
-    Parameters:
-    summoner_name (str): The name of the summoner.
-    region (str, optional): The region where the summoner is located. Defaults to "na1".
-
-    Returns:
-    dict: A dictionary containing the summoner name, region, mass region, and puuid.
-    """
+async def get_summoner_info(summoner_name: str, region: Region = Region.na1):
     RIOT_API_KEY = os.getenv("RIOT_API_KEY")
-    if region not in REGIONS:
-        raise HTTPException(status_code=400, detail="Invalid region")
 
     region_to_mass_region = {
         "na1": "americas",
@@ -62,12 +51,10 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
         "kr": "asia",
         "oc1": "sea"
     }
-    if region is None:
-        region = "na1"
     mass_region = region_to_mass_region.get(region, "americas")
 
     route = RIOT_API_ROUTES["summoner"].format(summonerName=summoner_name)
-    RIOT_API_URL = f"https://{region}.{RIOT_API_BASE_URL}{route}"
+    RIOT_API_URL = f"https://{region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     response = await get_api_response(RIOT_API_URL, headers)
     if response.get('status_code') == 200:
@@ -77,7 +64,9 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
         "summoner_name": summoner_name,
         "region": region,
         "mass_region": mass_region,
-        "puuid": response.get("puuid")
+        "puuid": response.get("puuid"),      
+        "summoner_level": response.get("summonerLevel"),
+        "profile_icon_id": response.get("profileIconId")
     }
 
 # Route to get match IDs using puuid
@@ -299,7 +288,8 @@ async def analyze_match_history(summoner_data: SummonerData):
 
 @router.get("/")
 async def home():
-  return {"message": "Welcome to the Esports Playmaker"}
+    return {"message": "Welcome to the Esports Playmaker"}
+
 
 @router.get("/public/logo.png")
 async def plugin_logo():
