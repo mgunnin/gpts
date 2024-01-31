@@ -1,7 +1,7 @@
 import sqlite3
 import unittest
 
-from lol_watcher.summoner_analytics import fetch_and_store_detailed_summoner_matches
+from summoner_analytics import fetch_and_store_detailed_summoner_matches
 
 
 class TestSummonerAnalytics(unittest.IsolatedAsyncioTestCase):
