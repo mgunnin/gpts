@@ -16,13 +16,10 @@ async def get_api_response(RIOT_API_URL: str, headers: dict):
         try:
             response = await client.get(RIOT_API_URL, headers=headers)
             response.raise_for_status()
-            return response.json(), response.status_code
+            return {"data": response.json(), "status_code": response.status_code}
         except httpx.HTTPStatusError as exc:
             logging.error(f"HTTPStatusError for {RIOT_API_URL}: {exc.response.text}")
-            return None, exc.response.status_code
+            return {"data": None, "status_code": exc.response.status_code}
         except Exception as exc:
             logging.error(f"Exception for {RIOT_API_URL}: {exc}")
-            return (
-                None,
-                500,
-            )  # Return 500 as a general error code for unexpected exceptions
+            return {"data": None, "status_code": 500}

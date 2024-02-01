@@ -104,7 +104,7 @@ cursor.execute(
 conn.commit()
 
 
-async def fetch_puuid(summoner_name: str, region: Region):
+async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
     url = f"https://{region.value}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     response, status_code = await get_api_response(url, headers)
@@ -180,6 +180,14 @@ async def fetch_and_store_detailed_summoner_matches(
     region: Region = Region.na1,
     mass_region: MassRegion = MassRegion.americas,
 ):
+    """
+    Fetches and stores detailed summoner matches in the database.
+
+    Args:
+        summoner_name (str): The name of the summoner.
+        region (Region, optional): The region of the summoner. Defaults to Region.na1.
+        mass_region (MassRegion, optional): The mass region of the summoner. Defaults to MassRegion.americas.
+    """
     headers = {"X-Riot-Token": RIOT_API_KEY}
     async with aiosqlite.connect("lol_summoner.db") as db:
         db_cursor = await db.cursor()
