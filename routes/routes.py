@@ -53,16 +53,16 @@ async def get_summoner_info(summoner_name: str, region: Region = Region.na1):
     RIOT_API_URL = f"https://{region.value}.{RIOT_API_BASE_URL}{route}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     response = await get_api_response(RIOT_API_URL, headers)
-    if response.get("status_code") == 200:
+    if response and response.get("status_code") == 200:
         response = response.get("json")
 
     return {
         "summoner_name": summoner_name,
         "region": region,
         "mass_region": mass_region,
-        "puuid": response.get("puuid"),
-        "summoner_level": response.get("summonerLevel"),
-        "profile_icon_id": response.get("profileIconId"),
+        "puuid": response.get("puuid") if response else None,
+        "summoner_level": response.get("summonerLevel") if response else None,
+        "profile_icon_id": response.get("profileIconId") if response else None,
     }
 
 

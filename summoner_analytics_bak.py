@@ -1,19 +1,21 @@
 import asyncio
 import csv
-import logging
 import os
 import sqlite3
-import Cassiopeia as cass
 
-import aiosqlite
 import requests
 from dotenv import load_dotenv
 
 from models import MassRegion, Region
 from utils import get_api_response
 import json
-
-
+import csv
+import json
+import aiosqlite
+import logging
+import requests
+from enum import Enum
+from typing import Tuple
 
 # Load environment variables
 load_dotenv()
@@ -82,32 +84,13 @@ cursor.execute(
 )
 conn.commit()
 
+class Region(Enum):
+    na1 = "na1"
 
-# Create table to store match statistics
-cursor.execute(
-    """
-        CREATE TABLE IF NOT EXISTS match_statistics (
-        puuid TEXT NOT NULL,
-        match_id TEXT NOT NULL,
-        game_creation INTEGER NOT NULL,
-        champion_name TEXT NOT NULL,
-        kills INTEGER NOT NULL,
-        deaths INTEGER NOT NULL,
-        assists INTEGER NOT NULL,
-        total_damage_dealt_to_champions INTEGER NOT NULL,
-        vision_score INTEGER NOT NULL,
-        gold_earned INTEGER NOT NULL,
-        total_minions_killed INTEGER NOT NULL,
-        role TEXT NOT NULL,
-        win BOOLEAN NOT NULL,
-        PRIMARY KEY (puuid, match_id)
-    )
-    """
-)
-conn.commit()
+class MassRegion(Enum):
+    americas = "americas"
 
-
-async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
+async def fetch_puuid(summoner_name: str, region: Region = Region.na1) -> Tuple[str, int]:
     url = f"https://{region.value}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     response, status_code = await get_api_response(url, headers)
@@ -117,7 +100,6 @@ async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
     else:
         return "", status_code
 
-
 async def fetch_and_store_summoner_data():
     with open("datasets/lol_champion_player_ranks_1-5.csv", "r") as file:
         csv_reader = csv.DictReader(file)
@@ -125,7 +107,7 @@ async def fetch_and_store_summoner_data():
             region = Region[row["Region"]]
             puuid = await fetch_puuid(row["Summoner"], region)
             if puuid:
-                cursor.execute(
+                await db_cursor.execute(
                     """
                     INSERT OR IGNORE INTO top_champion_players (champion, region, rank, tier, summoner_name, puuid)
                     VALUES (?, ?, ?, ?, ?, ?)
@@ -139,7 +121,7 @@ async def fetch_and_store_summoner_data():
                         puuid,
                     ),
                 )
-                conn.commit()
+                await db.commit()
 
 async def fetch_and_store_match_statistics(puuid, headers):
     url = f"{RIOT_API_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20"
@@ -158,7 +140,7 @@ async def fetch_and_store_match_statistics(puuid, headers):
                         for participant in participants:
                             if participant["puuid"] == puuid:
                                 game_creation = info["gameCreation"]
-                                cursor.execute(
+                                await db_cursor.execute(
                                     """
                                     INSERT OR IGNORE INTO match_statistics (puuid, match_id, game_creation, champion_name, kills, deaths, assists, total_damage_dealt_to_champions, vision_score, gold_earned, total_minions_killed, role, win)
                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -179,7 +161,7 @@ async def fetch_and_store_match_statistics(puuid, headers):
                                         participant["win"],
                                     ),
                                 )
-                                conn.commit()
+        await db.commit()
 
 async def fetch_and_store_detailed_summoner_matches(
     summoner_name,
@@ -206,7 +188,7 @@ async def fetch_and_store_detailed_summoner_matches(
 
         # Check if the summoner was found
         if summoner_response is not None:
-            summoner_response = json.loads(json.dumps(summoner_response))  # Parse summoner_response as JSON
+            summoner_response = json.loads(summoner_response)  # Parse summoner_response as JSON
             summoner_name = summoner_response.get("name")
             puuid = summoner_response.get("puuid")
         else:
@@ -380,11 +362,4 @@ async def main():
         for summoner in summoners:
             await fetch_and_store_match_statistics(summoner[0], headers={})
 
-
-# Main execution block
-if __name__ == "__main__":
-    asyncio.run(fetch_and_store_summoner_data())
-    summoners = cursor.execute("SELECT puuid FROM summoners").fetchall()
-    for summoner in summoners:
-        asyncio.run(fetch_and_store_match_statistics(summoner[0], headers={}))
-    conn.close()
+asyncio.run(main())

@@ -257,19 +257,16 @@ def match_to_df(data_rows):
     # lets construct columns from the teamId and champions_in_game column
 
     # new column, list of champions on player's team
-    if "champions_in_game" in df.columns:
-        df["teammates_championId"] = df.apply(
-            lambda x: x["champions_in_game"].get(x["teamId"]), axis=1
-        )
+    df["teammates_championId"] = df.apply(
+        lambda x: x["champions_in_game"].get(x["teamId"]), axis=1
+    )
 
     # new column, list of enemy champions
     opposite_team_dict = {100: 200, 200: 100}
-    if "teamId" in df.columns:
-        df["opposite_team_id"] = df["teamId"].map(opposite_team_dict)
-    if "enemies_championId" in df.columns:
-        df["enemies_championId"] = df.apply(
-            lambda x: x["champions_in_game"].get(x["opposite_team_id"]), axis=1
-        )
+    df["opposite_team_id"] = df["teamId"].map(opposite_team_dict)
+    df["enemies_championId"] = df.apply(
+        lambda x: x["champions_in_game"].get(x["opposite_team_id"]), axis=1
+    )
 
     # split list into individual columns
     player_cols = ["enemies_championId", "teammates_championId"]
