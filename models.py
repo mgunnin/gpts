@@ -3,6 +3,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+
 class Region(str, Enum):
     na1 = "na1"
     br1 = "br1"
@@ -11,25 +12,36 @@ class Region(str, Enum):
     jp1 = "jp1"
     kr = "kr"
 
+
 class MassRegion(str, Enum):
     americas = "americas"
     europe = "europe"
     asia = "asia"
     sea = "sea"
 
+
 class PlayerStats(BaseModel):
     assists: int = Field(..., description="Number of assists made by the player")
     deaths: int = Field(..., description="Number of deaths of the player")
     kills: int = Field(..., description="Number of kills made by the player")
-    gold_per_minute: float = Field(..., description="Gold earned per minute by the player")
-    damage_per_minute: float = Field(..., description="Damage dealt per minute by the player")
-    kill_participation: float = Field(..., description="Kill participation rate of the player")
+    gold_per_minute: float = Field(
+        ..., description="Gold earned per minute by the player"
+    )
+    damage_per_minute: float = Field(
+        ..., description="Damage dealt per minute by the player"
+    )
+    kill_participation: float = Field(
+        ..., description="Kill participation rate of the player"
+    )
     total_heal: int = Field(..., description="Total healing done by the player")
-    total_damage_dealt_to_champions: int = Field(..., description="Total damage dealt to champions by the player")
+    total_damage_dealt_to_champions: int = Field(
+        ..., description="Total damage dealt to champions by the player"
+    )
     vision_score: int = Field(..., description="Vision score of the player")
     wards_placed: int = Field(..., description="Number of wards placed by the player")
     gold_earned: int = Field(..., description="Total gold earned by the player")
     gold_spent: int = Field(..., description="Total gold spent by the player")
+
 
 class Match(BaseModel):
     game_id: int = Field(..., description="Game ID")
@@ -44,7 +56,10 @@ class Match(BaseModel):
     game_type: str = Field(..., description="Game type")
     teams: List[dict] = Field(..., description="List of team data")
     participants: List[PlayerStats] = Field(..., description="List of participant data")
-    participant_identities: List[dict] = Field(..., description="List of participant identities")
+    participant_identities: List[dict] = Field(
+        ..., description="List of participant identities"
+    )
+
 
 class SummonerData(BaseModel):
     matches: List[Match] = Field(..., description="List of matches")

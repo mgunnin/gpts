@@ -1,7 +1,6 @@
 import os
 
-from cassiopeia import Match, Queue, Summoner
-from cassiopeia import cassiopeia as cass
+import cassiopeia as cass
 from dotenv import load_dotenv
 from fastapi import APIRouter
 
@@ -73,6 +72,7 @@ async def get_match_ids(summoner_name: str, region: str = "NA"):
     match_ids = [match.id for match in match_history]
 
     return match_ids
+
 
 @cass_router.get("/cass/match_details/{match_id}")
 async def get_match_details(match_id: int, region: str = "NA"):
@@ -172,8 +172,7 @@ async def find_player_data(
 
 
 @cass_router.get("/cass/gather_all_data/{name}/{no_games}")
-async def gather_all_data(
-    name: str, region: str = "NA"):
+async def gather_all_data(name: str, region: str = "NA"):
     # Get match_ids for the number of games requested
     match_ids = await get_match_ids(name, region)
 

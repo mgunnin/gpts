@@ -1,303 +1,146 @@
 import asyncio
 import csv
-import logging
 import os
-import sqlite3
-# import Cassiopeia as cass
 
 import aiosqlite
-import requests
+import cassiopeia as cass
+from cassiopeia import MatchHistory, Queue, Summoner
 from dotenv import load_dotenv
 
 from models import MassRegion, Region
 from utils import get_api_response
-import json
-
-
 
 # Load environment variables
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 RIOT_API_BASE_URL = os.getenv("RIOT_API_BASE_URL")
 
+
 # Connect to SQLite database (or create it if it doesn't exist)
-conn = sqlite3.connect("lol_summoner.db")
-cursor = conn.cursor()
-
-# Create table to store top player data for each champion
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS top_champion_players (
-        champion TEXT NOT NULL,
-        region TEXT NOT NULL,
-        rank INTEGER NOT NULL,
-        tier TEXT NOT NULL,
-        summoner_name TEXT NOT NULL,
-        puuid TEXT UNIQUE NOT NULL,
-        PRIMARY KEY (champion, summoner_name, rank)
-    )
-    """
-)
-
-# Commit the changes
-conn.commit()
-
-async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
-    url = f"https://{region.value}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
-    headers = {"X-Riot-Token": RIOT_API_KEY}
-    response_dict = await get_api_response(url, headers)
-    response = response_dict["data"]
-    status_code = response_dict["status_code"]
-    print(f"Response: {response}")  # Print the response
-    print(f"Status code: {status_code}")  # Print the status code
-    if response:
-        puuid = response.get("puuid", "")
-        return puuid, status_code
-    else:
-        return "", status_code
-
-# Function to load data from CSV into the database
-def load_top_players_data(csv_file_path):
-    with open(csv_file_path, newline="", encoding="utf-8-sig") as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            # Fetch the puuid for the summoner
-            puuid, _ = asyncio.run(fetch_puuid(row["Summoner"], Region[row["Region"]]))
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO top_champion_players (champion, region, rank, tier, summoner_name, puuid)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    row["Champion"],
-                    row["Region"],
-                    row["Rank"],
-                    row["Tier"],
-                    row["Summoner"],
-                    puuid,
-                ),
+async def create_db():
+    async with aiosqlite.connect("lol_summoner.db") as db:
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS top_champion_players (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                summoner_name TEXT NOT NULL,
+                region TEXT NOT NULL,
+                puuid TEXT UNIQUE NOT NULL,
+                account_id TEXT,
+                profile_icon_id INTEGER,
+                UNIQUE(summoner_name, region)
             )
-    # Commit the changes
-    conn.commit()
+            """
+        )
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS champion_rank (
+                summoner_id INTEGER NOT NULL,
+                champion TEXT NOT NULL,
+                rank INTEGER NOT NULL,
+                tier TEXT NOT NULL,
+                FOREIGN KEY(summoner_id) REFERENCES top_champion_players(id)
+            )
+            """
+        )
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS match_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                puuid TEXT NOT NULL,
+                match_id TEXT NOT NULL,
+                game_creation INTEGER NOT NULL,
+                champion_name TEXT NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                assists INTEGER NOT NULL,
+                total_damage_dealt_to_champions INTEGER NOT NULL,
+                vision_score INTEGER NOT NULL,
+                gold_earned INTEGER NOT NULL,
+                total_minions_killed INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                win BOOLEAN NOT NULL,
+                FOREIGN KEY(puuid) REFERENCES top_champion_players(puuid)
+            )
+            """
+        )
+        await db.commit()
 
 
-# Load data from CSV file
-load_top_players_data("datasets/lol_champion_player_ranks_1-5.csv")
-
-# Create table to store summoners
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS summoners (
-        summoner_name TEXT NOT NULL,
-        region TEXT NOT NULL,
-        puuid TEXT NOT NULL,
-        riot_id TEXT NOT NULL,
-        PRIMARY KEY (summoner_name, region)
-    )
-    """
-)
-conn.commit()
-
-
-# Create table to store match statistics
-cursor.execute(
-    """
-        CREATE TABLE IF NOT EXISTS match_statistics (
-        puuid TEXT NOT NULL,
-        match_id TEXT NOT NULL,
-        game_creation INTEGER NOT NULL,
-        champion_name TEXT NOT NULL,
-        kills INTEGER NOT NULL,
-        deaths INTEGER NOT NULL,
-        assists INTEGER NOT NULL,
-        total_damage_dealt_to_champions INTEGER NOT NULL,
-        vision_score INTEGER NOT NULL,
-        gold_earned INTEGER NOT NULL,
-        total_minions_killed INTEGER NOT NULL,
-        role TEXT NOT NULL,
-        win BOOLEAN NOT NULL,
-        PRIMARY KEY (puuid, match_id)
-    )
-    """
-)
-conn.commit()
-
-
-async def fetch_and_store_summoner_data():
-    with open("datasets/lol_champion_player_ranks_1-5.csv", "r") as file:
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            region = Region[row["Region"]]
-            puuid, _ = await fetch_puuid(row["Summoner"], region)
-            if puuid:
-                cursor.execute(
-                    """
-                    INSERT OR IGNORE INTO top_champion_players (champion, region, rank, tier, summoner_name, puuid)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        row["Champion"],
-                        row["Region"],
-                        row["Rank"],
-                        row["Tier"],
-                        row["Summoner"],
-                        puuid,
-                    ),
+# Load top players data from a CSV file and store it in the database
+async def load_top_players_data(csv_file_path):
+    async with aiosqlite.connect("lol_summoner.db") as db:
+        with open(csv_file_path, newline="", encoding="utf-8-sig") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                puuid, account_id, profile_icon_id = await fetch_summoner_details(
+                    row["Summoner"]
                 )
-                conn.commit()
+                if puuid:
+                    await db.execute(
+                        """
+                        INSERT OR IGNORE INTO top_champion_players (summoner_name, region, puuid, account_id, profile_icon_id)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                        (
+                            row["Summoner"],
+                            row["Region"],
+                            puuid,
+                            account_id,
+                            profile_icon_id,
+                        ),
+                    )
+                    summoner_id = await db.execute(
+                        "SELECT id FROM top_champion_players WHERE puuid = ?", (puuid,)
+                    )
+                    summoner_id = await summoner_id.fetchone()
+                    if summoner_id:
+                        await db.execute(
+                            """
+                            INSERT INTO champion_rank (summoner_id, champion, rank, tier)
+                            VALUES (?, ?, ?, ?)
+                            """,
+                            (summoner_id[0], row["Champion"], row["Rank"], row["Tier"]),
+                        )
+        await db.commit()
 
-async def fetch_and_store_match_statistics(puuid, headers):
-    url = f"{RIOT_API_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        match_ids = response.json()
-        for match_id in match_ids:
-            match_data, status_code = await get_api_response(
-                f"{RIOT_API_BASE_URL}/lol/match/v5/matches/{match_id}", headers=headers
-            )
-            if status_code == 200 and match_data:
-                info = match_data.get("info")
-                if info:
-                    participants = info["participants"]
-                    if participants:
-                        for participant in participants:
-                            if participant["puuid"] == puuid:
-                                game_creation = info["gameCreation"]
-                                cursor.execute(
-                                    """
-                                    INSERT OR IGNORE INTO match_statistics (puuid, match_id, game_creation, champion_name, kills, deaths, assists, total_damage_dealt_to_champions, vision_score, gold_earned, total_minions_killed, role, win)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                    """,
-                                    (
-                                        puuid,
-                                        match_id,
-                                        game_creation,
-                                        participant["championName"],
-                                        participant["kills"],
-                                        participant["deaths"],
-                                        participant["assists"],
-                                        participant["totalDamageDealtToChampions"],
-                                        participant["visionScore"],
-                                        participant["goldEarned"],
-                                        participant["totalMinionsKilled"],
-                                        participant["role"],
-                                        participant["win"],
-                                    ),
-                                )
-                                conn.commit()
 
-async def fetch_and_store_detailed_summoner_matches(
-    summoner_name,
-    region: Region = Region.na1,
-    mass_region: MassRegion = MassRegion.americas,
+async def fetch_summoner_details(summoner_name: str, region: str = "NA"):
+    summoner = cass.get_summoner(name=summoner_name, region=region)
+    puuid = summoner.puuid
+    account_id = summoner.account_id
+    profile_icon_id = summoner.profile_icon.id
+    return puuid, account_id, profile_icon_id
+
+
+async def fetch_match_history(puuid: str):
+    headers = {"X-Riot-Token": RIOT_API_KEY}
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20"
+    response_dict = await get_api_response(url, headers)
+    match_ids = response_dict["data"]
+    return match_ids if match_ids else []
+
+
+async def store_match_history(
+    puuid: str,
+    match_ids: list,
 ):
-    """
-    Fetches and stores detailed summoner matches in the database.
-
-    Args:
-        summoner_name (str): The name of the summoner.
-        region (Region, optional): The region of the summoner. Defaults to Region.na1.
-        mass_region (MassRegion, optional): The mass region of the summoner. Defaults to MassRegion.americas.
-    """
     headers = {"X-Riot-Token": RIOT_API_KEY}
     async with aiosqlite.connect("lol_summoner.db") as db:
-        db_cursor = await db.cursor()
-
-        # Fetch PUUID and Riot ID for the summoner
-        summoner_response = await get_api_response(
-            f"https://{region.value}.{RIOT_API_BASE_URL}/lol/summoner/v4/summoners/by-name/{summoner_name}",
-            headers,
-        )
-
-        # Check if the summoner was found
-        if summoner_response is not None:
-            summoner_response = json.loads(json.dumps(summoner_response))  # Parse summoner_response as JSON
-            summoner_name = summoner_response.get("name")
-            puuid = summoner_response.get("puuid")
-        else:
-            logging.error(f"Summoner {summoner_name} not found, skipping.")
-            return
-
-        # Store the summoner data in the database
-        await db_cursor.execute(
-            """
-            
-            INSERT OR IGNORE INTO summoners (
-                summoner_name,
-                region,
-                puuid
-            ) VALUES (?, ?, ?)
-            """,
-            (summoner_name, region.value, puuid),
-        )
-
-        # Fetch match IDs for the summoner using PUUID
-        match_ids_response, match_ids_status = await get_api_response(
-            f"https://{mass_region.value}.{RIOT_API_BASE_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20",
-            headers,
-        )
-
-        if match_ids_status != 200:
-            error_message = (
-                match_ids_response.get("status", {}).get("message")
-                if match_ids_response is not None
-                else ""
-            )
-            if match_ids_response is not None:
-                logging.error(
-                    f"Error retrieving match IDs for summoner {summoner_name}: {error_message}"
-                )
-            return
-
-        # Fetch and store data for each match using match IDs
-        if match_ids_response is not None:
-            for match_id in match_ids_response:
-                match_data_response, match_data_status = await get_api_response(
-                    f"https://{mass_region.value}.{RIOT_API_BASE_URL}/lol/match/v5/matches/{match_id}",
-                    headers,
-                )
-
-                if match_data_status != 200:
-                    if match_data_response is not None:
-                        error_message = match_data_response.get("status", {}).get(
-                            "message", ""
-                        )
-                        logging.error(
-                            f"Error retrieving match data for match ID {match_id}: {error_message}"
-                        )
-                    continue
-
-                # Extract match details and store them in the database
-                if match_data_response is not None:
-                    match_info = match_data_response.get("info")
-                else:
-                    logging.error(
-                        f"Error retrieving match data for match ID {match_id}"
-                    )
-                    continue
-                for participant in match_info["participants"]:
+        for match_id in match_ids:
+            url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}"
+            match_data = await get_api_response(url, headers)
+            if match_data["status_code"] == 200:
+                match_info = match_data["data"]["info"]
+                participants = match_info["participants"]
+                for participant in participants:
                     if participant["puuid"] == puuid:
-                        await db_cursor.execute(
+                        await db.execute(
                             """
-                            INSERT OR IGNORE INTO detailed_summoner_match_data (
-                                summoner_name,
-                                puuid,
-                                match_id,
-                                timestamp,
-                                champion,
-                                kills,
-                                deaths,
-                                assists,
-                                total_damage_dealt_to_champions,
-                                vision_score,
-                                gold_earned,
-                                total_minions_killed,
-                                role,
-                                win
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            INSERT INTO match_history (puuid, match_id, game_creation, champion_name, kills, deaths, assists, total_damage_dealt_to_champions, vision_score, gold_earned, total_minions_killed, role, win)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """,
                             (
-                                summoner_name,
                                 puuid,
                                 match_id,
                                 match_info["gameCreation"],
@@ -315,82 +158,39 @@ async def fetch_and_store_detailed_summoner_matches(
                         )
         await db.commit()
 
-async def main():
+
+async def analyze_and_provide_advice(puuid: str):
     async with aiosqlite.connect("lol_summoner.db") as db:
-        db_cursor = await db.cursor()
-
-        # Create top_champion_players table
-        await db_cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS top_champion_players (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                champion TEXT NOT NULL,
-                region TEXT NOT NULL,
-                rank TEXT NOT NULL,
-                tier TEXT NOT NULL,
-                summoner_name TEXT NOT NULL,
-                puuid TEXT NOT NULL,
-                UNIQUE(summoner_name)
-            )
-            """
+        cursor = await db.execute(
+            "SELECT kills, deaths, assists FROM match_history WHERE puuid = ?",
+            (puuid,),
         )
-
-        # Create match_statistics table
-        await db_cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS match_statistics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                puuid TEXT NOT NULL,
-                match_id TEXT NOT NULL,
-                game_creation INTEGER NOT NULL,
-                champion_name TEXT NOT NULL,
-                kills INTEGER NOT NULL,
-                deaths INTEGER NOT NULL,
-                assists INTEGER NOT NULL,
-                total_damage_dealt_to_champions INTEGER NOT NULL,
-                vision_score INTEGER NOT NULL,
-                gold_earned INTEGER NOT NULL,
-                total_minions_killed INTEGER NOT NULL,
-                role TEXT NOT NULL,
-                win BOOLEAN NOT NULL
-            )
-            """
-        )
-
-        # Create detailed_summoner_match_data table
-        await db_cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS detailed_summoner_match_data (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                puuid TEXT NOT NULL,
-                match_id TEXT NOT NULL,
-                timestamp INTEGER NOT NULL,
-                champion TEXT NOT NULL,
-                kills INTEGER NOT NULL,
-                deaths INTEGER NOT NULL,
-                assists INTEGER NOT NULL,
-                total_damage_dealt_to_champions INTEGER NOT NULL,
-                vision_score INTEGER NOT NULL,
-                gold_earned INTEGER NOT NULL,
-                total_minions_killed INTEGER NOT NULL,
-                role TEXT NOT NULL,
-                win BOOLEAN NOT NULL
-            )
-            """
-        )
-
-        await fetch_and_store_summoner_data()
-
-        await db_cursor.execute("SELECT puuid FROM summoners")
-        summoners = await db_cursor.fetchall()
-        for summoner in summoners:
-            await fetch_and_store_match_statistics(summoner[0], headers={})
+        matches = await cursor.fetchall()
+        if matches:
+            avg_kills = sum(match[0] for match in matches) / len(matches)
+            avg_deaths = sum(match[1] for match in matches) / len(matches)
+            avg_assists = sum(match[2] for match in matches) / len(matches)
+            advice = "Try to focus on staying alive and assisting your teammates more if your deaths are high."
+            if avg_deaths > avg_kills:
+                return advice
+            else:
+                return "Great job on keeping a positive KDA! Keep focusing on your objectives."
+        return "No matches found to analyze."
 
 
-# Main execution block
+async def main():
+    await create_db()
+    await load_top_players_data("datasets/lol_champion_player_ranks_testing.csv")
+    # Example usage for a specific summoner
+    puuid = (
+        "k_BCLNxYlH8OxUwqcHOCmHvBnGUci9cFxm2uZNgOs8vI-HcLa4BD1bBTQnPGum13wlrijcdnLH801Q"
+    )
+    if puuid:
+        match_ids = await fetch_match_history(puuid)
+        await store_match_history(puuid, match_ids)
+        advice = await analyze_and_provide_advice(puuid)
+        print(advice)
+
+
 if __name__ == "__main__":
-    asyncio.run(fetch_and_store_summoner_data())
-    summoners = cursor.execute("SELECT puuid FROM summoners").fetchall()
-    for summoner in summoners:
-        asyncio.run(fetch_and_store_match_statistics(summoner[0], headers={}))
-    conn.close()
+    asyncio.run(main())

@@ -152,7 +152,6 @@ def get_match_data(mastery_dict, num_matches=10):
         "totalDamageDealtToChampions",
         "role",
         "teamPosition",
-        "teamId",
         "gameEndedInEarlySurrender",
         "win",
     ]

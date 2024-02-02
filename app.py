@@ -6,9 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from exceptions import MissingEnvironmentVariableError
+from routes.cassio import cass_router
 from routes.routes import router
 from routes.watcher import watcher_router
-from routes.cass import cass_router
 
 load_dotenv()
 
