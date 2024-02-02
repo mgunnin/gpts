@@ -3,7 +3,7 @@ import csv
 import logging
 import os
 import sqlite3
-import Cassiopeia as cass
+# import Cassiopeia as cass
 
 import aiosqlite
 import requests
@@ -42,16 +42,31 @@ cursor.execute(
 # Commit the changes
 conn.commit()
 
+async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
+    url = f"https://{region.value}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
+    headers = {"X-Riot-Token": RIOT_API_KEY}
+    response_dict = await get_api_response(url, headers)
+    response = response_dict["data"]
+    status_code = response_dict["status_code"]
+    print(f"Response: {response}")  # Print the response
+    print(f"Status code: {status_code}")  # Print the status code
+    if response:
+        puuid = response.get("puuid", "")
+        return puuid, status_code
+    else:
+        return "", status_code
 
 # Function to load data from CSV into the database
 def load_top_players_data(csv_file_path):
     with open(csv_file_path, newline="", encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            # Fetch the puuid for the summoner
+            puuid, _ = asyncio.run(fetch_puuid(row["Summoner"], Region[row["Region"]]))
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO top_champion_players (champion, region, rank, tier, summoner_name)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR REPLACE INTO top_champion_players (champion, region, rank, tier, summoner_name, puuid)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     row["Champion"],
@@ -59,6 +74,7 @@ def load_top_players_data(csv_file_path):
                     row["Rank"],
                     row["Tier"],
                     row["Summoner"],
+                    puuid,
                 ),
             )
     # Commit the changes
@@ -107,23 +123,12 @@ cursor.execute(
 conn.commit()
 
 
-async def fetch_puuid(summoner_name: str, region: Region = Region.na1):
-    url = f"https://{region.value}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
-    headers = {"X-Riot-Token": RIOT_API_KEY}
-    response, status_code = await get_api_response(url, headers)
-    if response is not None:
-        response_dict = json.loads(response)
-        return response_dict.get("puuid", ""), status_code
-    else:
-        return "", status_code
-
-
 async def fetch_and_store_summoner_data():
     with open("datasets/lol_champion_player_ranks_1-5.csv", "r") as file:
         csv_reader = csv.DictReader(file)
         for row in csv_reader:
             region = Region[row["Region"]]
-            puuid = await fetch_puuid(row["Summoner"], region)
+            puuid, _ = await fetch_puuid(row["Summoner"], region)
             if puuid:
                 cursor.execute(
                     """
@@ -216,6 +221,7 @@ async def fetch_and_store_detailed_summoner_matches(
         # Store the summoner data in the database
         await db_cursor.execute(
             """
+            
             INSERT OR IGNORE INTO summoners (
                 summoner_name,
                 region,
