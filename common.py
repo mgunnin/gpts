@@ -1,4 +1,3 @@
-# common.py
 import sqlite3
 
 import cassiopeia as cass
