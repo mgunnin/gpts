@@ -6,36 +6,49 @@ async def create_db():
     db_schema = """
     CREATE TABLE IF NOT EXISTS top_champion_players (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        summoner_name TEXT NOT NULL,
-        region TEXT NOT NULL,
-        puuid TEXT UNIQUE NOT NULL,
+        summoner_name TEXT,
+        region TEXT,
+        champion TEXT,
+        puuid TEXT UNIQUE,
         account_id TEXT,
         profile_icon_id INTEGER,
         summoner_level INTEGER,
         summoner_id TEXT,
-        UNIQUE(summoner_name, region)
+        UNIQUE(account_id)
     );
     CREATE TABLE IF NOT EXISTS match_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        puuid TEXT NOT NULL,
-        match_id TEXT NOT NULL,
-        game_creation INTEGER NOT NULL,
-        champion_name TEXT NOT NULL,
-        kills INTEGER NOT NULL,
-        deaths INTEGER NOT NULL,
-        assists INTEGER NOT NULL,
-        total_damage_dealt_to_champions INTEGER NOT NULL,
-        vision_score INTEGER NOT NULL,
-        gold_earned INTEGER NOT NULL,
-        total_minions_killed INTEGER NOT NULL,
-        role TEXT NOT NULL,
-        win BOOLEAN NOT NULL,
+        game_id TEXT,
+        game_duration INTEGER,
+        puuid TEXT,
+        summoner_name TEXT,
+        champion_name TEXT,
+        kills INTEGER,
+        deaths INTEGER,
+        assists INTEGER,
+        total_damage_dealt INTEGER,
+        total_damage_taken INTEGER,
+        total_healing_done INTEGER,
+        total_damage_dealt_to_champions INTEGER,
+        total_minions_killed INTEGER,
+        vision_score INTEGER,
+        gold_earned INTEGER,
+        win BOOLEAN,
         FOREIGN KEY(puuid) REFERENCES top_champion_players(puuid)
     );
     """
     async with aiosqlite.connect(CONFIG["DB_PATH"]) as db:
         await db.executescript(db_schema)
         await db.commit()
+
+
+async def puuid_exists(puuid):
+    async with aiosqlite.connect(CONFIG["DB_PATH"]) as db:
+        cursor = await db.execute(
+            "SELECT 1 FROM top_champion_players WHERE puuid = ?", (puuid,)
+        )
+        result = await cursor.fetchone()
+        return result is not None
 
 
 async def fetch_all_puuids():
@@ -48,19 +61,19 @@ async def fetch_all_puuids():
 
 async def insert_top_champion_players(data):
     insert_sql = """
-    INSERT INTO top_champion_players (summoner_name, region, puuid, account_id, profile_icon_id, summoner_level, summoner_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO top_champion_players (summoner_name, region, champion, puuid, account_id, profile_icon_id, summoner_level, summoner_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """
     async with aiosqlite.connect(CONFIG["DB_PATH"]) as db:
         await db.execute(insert_sql, data)
         await db.commit()
 
 
-async def insert_match_history(data):
+async def insert_match_history(match_data):
     insert_sql = """
-    INSERT INTO match_history (puuid, match_id, game_creation, champion_name, kills, deaths, assists, total_damage_dealt_to_champions, vision_score, gold_earned, total_minions_killed, role, win)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO match_history (game_id, game_duration, puuid, summoner_name, champion_name, kills, deaths, assists, total_damage_dealt, total_damage_taken, total_healing_done, total_damage_dealt_to_champions, total_minions_killed, vision_score, gold_earned, win)
+    VALUES (:game_id, :game_duration, :puuid, :summoner_name, :champion_name, :kills, :deaths, :assists, :total_damage_dealt, :total_damage_taken, :total_healing_done, :total_damage_dealt_to_champions, :total_minions_killed, :vision_score, :gold_earned, :win)
     """
     async with aiosqlite.connect(CONFIG["DB_PATH"]) as db:
-        await db.execute(insert_sql, data)
+        await db.execute(insert_sql, match_data)
         await db.commit()
