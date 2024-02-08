@@ -2,7 +2,6 @@ import asyncio
 import csv
 import traceback
 
-import arrow
 import cassiopeia as cass
 from cassiopeia import Queue
 from config import CONFIG
@@ -12,6 +11,31 @@ cass.set_riot_api_key(CONFIG["RIOT_API_KEY"])
 
 
 async def fetch_and_store_player_data(summoner_name, region, champion):
+    """
+    Asynchronously fetches and stores player data for a given summoner name, region, and champion.
+
+    This function performs several key operations to ensure that the player data related to a specific summoner name,
+    region, and champion is fetched from the Riot Games API and stored in the database efficiently and correctly. The
+    process involves fetching the summoner's details using the Cassiopeia wrapper for the Riot Games API, checking if
+    the player's unique identifier (puuid) already exists in the database to avoid duplicate entries, and inserting the
+    player's data into the database if it is new.
+
+    The function handles exceptions gracefully, printing out the error details and a traceback for debugging purposes
+    if an error occurs during the process. It ensures that only unique player data is stored in the database by checking
+    the presence of the summoner's puuid in the database before attempting to insert new data.
+
+    Parameters:
+    - summoner_name (str): The name of the summoner whose data is to be fetched and stored.
+    - region (str): The region in which the summoner plays (e.g., 'NA', 'EUW', etc.).
+    - champion (str): The name of the champion for which the player data is being fetched.
+
+    Returns:
+    - None: This function does not return any value. It performs database operations and prints messages to the console.
+
+    Raises:
+    - Exception: Catches and handles any exceptions that occur during the execution of the function, printing the error
+      type, message, and a traceback for debugging purposes.
+    """
     try:
         summoner = cass.get_summoner(name=summoner_name, region=region)
         if hasattr(summoner, "puuid") and summoner.puuid:
@@ -68,7 +92,25 @@ async def process_csv_file(file_path):
 
 
 async def fetch_match_history_by_puuid(puuid: str, continent):
-    # Directly use PUUID to fetch match history
+    """
+    Fetches the match history for a given player's PUUID and a specific continent.
+
+    This function retrieves the match history of a player identified by their PUUID (Player Universally Unique Identifier)
+    on a specified continent. It queries the match history using the Cassiopeia library, filtering for ranked solo 5v5 games
+    and limiting the results to the 10 most recent matches. For each match in the history, it extracts detailed information
+    about the player's performance, including game ID, PUUID, summoner name, champion played, kills, deaths, assists, KDA ratio,
+    total damage dealt, total damage taken, total healing done, total damage dealt to champions, total minions killed, vision score,
+    gold earned, and whether the match was won or lost.
+
+    The function returns a list of dictionaries, each representing the data for one match.
+
+    Parameters:
+    - puuid (str): The PUUID of the player whose match history is being fetched.
+    - continent (str): The continent on which the player's match history is to be queried.
+
+    Returns:
+    - list[dict]: A list of dictionaries, each containing detailed information about a single match from the player's history.
+    """
     match_history = cass.get_match_history(
         continent=continent,
         puuid=puuid,
@@ -80,13 +122,13 @@ async def fetch_match_history_by_puuid(puuid: str, continent):
         summoner = match.participants[puuid]
         match_data = {
             "game_id": match.id,
-            "game_duration": match.duration,
             "puuid": puuid,
             "summoner_name": summoner.summoner.name,
             "champion_name": summoner.champion.name,
             "kills": summoner.stats.kills,
             "deaths": summoner.stats.deaths,
             "assists": summoner.stats.assists,
+            "kda": summoner.stats.kda,
             "total_damage_dealt": summoner.stats.total_damage_dealt,
             "total_damage_taken": summoner.stats.total_damage_taken,
             "total_healing_done": summoner.stats.total_heal,

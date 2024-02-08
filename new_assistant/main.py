@@ -6,7 +6,14 @@ from riot_api import fetch_match_history_by_puuid, process_csv_file
 
 async def main():
     await create_db()
-    await process_csv_file("../data/lol/lol_champion_player_ranks_testing.csv")
+    # Ensure process_csv_file is an asynchronous function or wrap it in asyncio.to_thread if it's I/O bound and not natively async.
+    if asyncio.iscoroutinefunction(process_csv_file):
+        await process_csv_file("../data/lol/lol_champion_player_ranks_1-5.csv")
+    else:
+        await asyncio.to_thread(
+            process_csv_file, "../data/lol/lol_champion_player_ranks_1-5.csv"
+        )
+
     puuids = await fetch_all_puuids()
     for puuid in puuids:
         matches_data = await fetch_match_history_by_puuid(puuid, continent="AMERICAS")

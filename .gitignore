@@ -2,3 +2,5 @@
 /tools/gpt-crawler
 /reference
 /routes/__pycache__
+/lol_gpt.db
+/lol_gpt_player_list.db

@@ -19,13 +19,13 @@ async def create_db():
     CREATE TABLE IF NOT EXISTS match_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         game_id TEXT,
-        game_duration INTEGER,
         puuid TEXT,
         summoner_name TEXT,
         champion_name TEXT,
         kills INTEGER,
         deaths INTEGER,
         assists INTEGER,
+        kda REAL,
         total_damage_dealt INTEGER,
         total_damage_taken INTEGER,
         total_healing_done INTEGER,
@@ -71,8 +71,8 @@ async def insert_top_champion_players(data):
 
 async def insert_match_history(match_data):
     insert_sql = """
-    INSERT INTO match_history (game_id, game_duration, puuid, summoner_name, champion_name, kills, deaths, assists, total_damage_dealt, total_damage_taken, total_healing_done, total_damage_dealt_to_champions, total_minions_killed, vision_score, gold_earned, win)
-    VALUES (:game_id, :game_duration, :puuid, :summoner_name, :champion_name, :kills, :deaths, :assists, :total_damage_dealt, :total_damage_taken, :total_healing_done, :total_damage_dealt_to_champions, :total_minions_killed, :vision_score, :gold_earned, :win)
+    INSERT INTO match_history (game_id, puuid, summoner_name, champion_name, kills, deaths, assists, kda, total_damage_dealt, total_damage_taken, total_healing_done, total_damage_dealt_to_champions, total_minions_killed, vision_score, gold_earned, win)
+    VALUES (:game_id, :puuid, :summoner_name, :champion_name, :kills, :deaths, :assists, :kda, :total_damage_dealt, :total_damage_taken, :total_healing_done, :total_damage_dealt_to_champions, :total_minions_killed, :vision_score, :gold_earned, :win)
     """
     async with aiosqlite.connect(CONFIG["DB_PATH"]) as db:
         await db.execute(insert_sql, match_data)
