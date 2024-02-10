@@ -2,10 +2,10 @@ import sqlite3
 
 import pandas as pd
 
-# initializes database definitions and primary key to avoid inserting duplicates into dataset
-# you can also use this file to just test stuff, get visualizations from the db. like a query GUI (without the G).
+# Initializes database definitions and primary key to avoid inserting duplicates into dataset
+# Can also use this file to just test stuff, get visualizations from the db, etc.
 # Connect to the database
-conn = sqlite3.connect("lol_gpt.db")
+conn = sqlite3.connect("lol_gpt_v2.db")
 
 # Execute SQL statement to add primary key
 # results = conn.execute('''select *, count(*) from player_table where summonerName="FOURE7038634357"''') # check if it duplicates. otherwise, perfect.

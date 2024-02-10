@@ -74,7 +74,7 @@ def get_puuid(request_ref, summoner_name, region, db):
         "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}".format(
             request_ref, summoner_name, region
         )
-    )  # europe, JASPERAN, EUW
+    )
 
     response = requests.get(request_url, headers=headers)
     # time.sleep(1)
@@ -542,7 +542,7 @@ def extract_matches(region, match_id, db, key):
     )
 
     response = requests.get(request_url, headers=headers)
-    # time.sleep(1.5)  # rate limiting purposes
+    # time.sleep(1.5)
     if response.status_code != 200:
         print(
             "{} Request error (@extract_matches). HTTP code {}".format(
@@ -1019,7 +1019,6 @@ def build_final_object(json_object):
     return all_frames
 
 
-# builds liveclient-affine data object.
 def build_final_object_liveclient(json_object):
     all_frames = list()
     match_id = str()
@@ -1201,7 +1200,6 @@ def build_final_object_liveclient(json_object):
     return all_frames
 
 
-# ------------------
 # CLASSIFIER MODEL (NO LIVE CLIENT API STRUCTURE)
 def process_predictor(db):
     connection = db.get_connection()

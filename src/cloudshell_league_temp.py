@@ -1,33 +1,30 @@
 import argparse
 import datetime
 import os
+import random
+import sqlite3
 import sys
 import time
 from pathlib import Path
 
 import pandas as pd
 import requests
-import ujson as json
-from attr import Attribute
 from dotenv import load_dotenv
-import sqlite3
-from sqlite3 import IntegrityError
 
+from init_db import run_init_db
 
-#from oracledb import exceptions
-#from utils.oracle_database import OracleJSONDatabaseThickConnection
-
-db = sqlite3.connect("lol_gpt_dev.db")
-
+conn = sqlite3.connect("lol_gpt_dev.db")
 
 load_dotenv()
 
+run_init_db()
+
 riot_api_key = os.getenv("RIOT_API_KEY")
+
 
 home = str(Path.home())
 p = os.path.abspath("..")
-sys.path.insert(1, p)  # add parent directory to path.
-# parse arguments for different execution modes.
+sys.path.insert(1, p)
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",
@@ -75,12 +72,10 @@ def get_puuid(request_ref, summoner_name, region, db):
         "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}".format(
             request_ref, summoner_name, region
         )
-    )  # europe, JASPERAN, EUW
+    )
 
     response = requests.get(request_url, headers=headers)
-    # time.sleep(1)
     if response.status_code == 200:
-        # print('{} Printing response for user {} - region {}: -----\n{}'.format(time.strftime("%Y-%m-%d %H:%M"), summoner_name, region, response.json()))
         pass
     elif response.status_code == 404:
         print(
@@ -100,8 +95,6 @@ def get_puuid(request_ref, summoner_name, region, db):
     return puuid
 
 
-# encrypted summoner ID: y8zda_vuZ5AkVYk8yXJrHa_ppKjIblOGKPCwzYcX9ywo4G0
-# will return the PUUID but can be changed to return anything.
 def get_summoner_information(summoner_name, request_region):
     assert request_region in request_regions
 
@@ -139,12 +132,8 @@ def get_champion_mastery(encrypted_summoner_id, request_region):
             )
         )
 
-    # Get champion IDs
     champion_df = pd.read_csv("../data/champion_ids.csv")
 
-    # Example: get champion name by its id.
-    # print(champion_df.loc[champion_df['champion_id'] == 103])
-    # Processing of the information
     print(
         "{} Total champions played: {}".format(
             time.strftime("%Y-%m-%d %H:%M"), len(response.json())
@@ -157,7 +146,7 @@ def get_champion_mastery(encrypted_summoner_id, request_region):
             ]
             .to_string()
             .split("    ")[1]
-        )  # get the champion name only
+        )
         print(
             "{} Champion ID {} | Champion Name {} | Mastery level {} | Total mastery points {} | Last time played {} | Points until next mastery level {} | Chest granted {} | Tokens earned {}".format(
                 time.strftime("%Y-%m-%d %H:%M"),
@@ -257,7 +246,6 @@ def get_n_match_ids(puuid, num_matches, queue_type, region):
 
     for x in range(int(num_matches / 100)):
         response = requests.get(request_url, headers=headers)
-        # time.sleep(1)
         if response.status_code != 200:
             print(
                 "{} Request error (@get_n_match_ids). HTTP code {}: {}".format(
@@ -266,16 +254,14 @@ def get_n_match_ids(puuid, num_matches, queue_type, region):
                     response.json(),
                 )
             )
-        # Return the list of matches.
         for i in response.json():
             returning_object.append({"match_id": i})
-        # Modify the next request_url.
         iterator = iterator + 100
         request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?type={}&start={}&count={}".format(
             region, puuid, queue_type, iterator, 100
         )
     print(
-        "{} @get_n_match_ids: obtained {} matches from region {}".format(
+        "[{}][API][get_n_match_ids] MATCHES {} REGION {}".format(
             time.strftime("%Y-%m-%d %H:%M"), len(returning_object), region
         )
     )
@@ -301,7 +287,6 @@ def get_match_timeline(match_id, region):
             )
         )
         return None
-    # Return the list of matches.
     return response.json()
 
 
@@ -321,11 +306,9 @@ def get_match_info(match_id, region):
                 time.strftime("%Y-%m-%d %H:%M"), response.status_code
             )
         )
-    # Return the list of matches.
     return response.json()
 
 
-# auxiliary function
 def determine_overall_region(region):
     overall_region = str()
     tagline = str()
@@ -335,24 +318,19 @@ def determine_overall_region(region):
         overall_region = "americas"
     else:
         overall_region = "asia"
-    # BR1, EUNE, EUW, JP1, KR, LA1, LA2, NA, OCE, RU, TR
     if region in ["br1", "jp1", "kr", "la1", "la2", "ru", "na1", "tr1", "oc1"]:
         tagline = region.upper()
     elif region == "euw1":
         tagline = "EUW"
     elif region == "eun1":
         tagline = "EUNE"
-    # 3 cases left: OCE
     return overall_region, tagline
 
 
 def get_top_players(region, queue, db):
     assert region in request_regions
     assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
-
     total_users_to_insert = list()
-    # master, grandmaster and challenger endpoints
-
     request_urls = [
         "https://{}.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/{}".format(
             region, queue
@@ -397,70 +375,29 @@ def get_top_players(region, queue, db):
                 )
             )
 
-    print(
-        "{} Total users obtained in region {} and queue {}: {}".format(
-            time.strftime("%Y-%m-%d %H:%M"), region, queue, len(total_users_to_insert)
-        )
-    )
-
-    # Insert into the database.
-    collection_summoner = (
-        db.get_connection().getSodaDatabase().createCollection("summoner")
-    )
-
-    # Insert the users.
     for x in total_users_to_insert:
-        x["request_region"] = region
-        x["queue"] = queue
+
+
+        df = pd.DataFrame(x, index=[0])
+
         try:
-            qbe = {"summonerId": x["summonerId"]}
-            if len(collection_summoner.find().filter(qbe).getDocuments()) == 0:
-                # In case they don't exist in the DB, we get their PUUIDs, in case they change their name.
-                overall_region, tagline = determine_overall_region(region)
-                x["puuid"] = get_puuid(overall_region, x["summonerName"], tagline, db)
-                db.insert("summoner", x)
-                print(
-                    "{} Inserted new summoner: {} in region {}, queue {}".format(
-                        time.strftime("%Y-%m-%d %H:%M"),
-                        x["summonerName"],
-                        region,
-                        queue,
-                    )
-                )
-            else:
-                print(
-                    "{} Summoner {} already inserted".format(
-                        time.strftime("%Y-%m-%d %H:%M"), x["summonerName"]
-                    )
-                )
-                continue
-        except exceptions.IntegrityError:
-                print(
-                    "{} Summoner {} already inserted".format(
-                        time.strftime("%Y-%m-%d %H:%M"), x["summonerName"]
-                    )
-                )
-                continue
+            df.to_sql("player_table", db, if_exists="append", index=False)
+            print("[INS]: {}".format(x["summonerName"]))
+        except ValueError:
+            print("[DUP]: {}".format(x["summonerName"]))
+            continue
+        except sqlite3.IntegrityError:
+            print("[DUP]: {}".format(x["summonerName"]))
+            continue
 
 
-# this function helps modify a column value
 def change_column_value_by_key(db, collection_name, column_name, column_value, key):
     connection = db.get_connection()
-    collection = connection.getSodaDatabase().createCollection(
-        collection_name
-    )  # get collection
-    found_doc = collection.find().key(key).getOne()  # find document by key
+    collection = connection.getSodaDatabase().createCollection(collection_name)
+    found_doc = collection.find().key(key).getOne()
     content = found_doc.getContent()
-    # change value of column_name to column_value
     content[column_name] = column_value
-    collection.find().key(key).replaceOne(content)  # replace document
-    print(
-        "{} [DBG] UPDATE BIT {}: {}".format(
-            time.strftime("%Y-%m-%d %H:%M"),
-            column_name,
-            collection.find().key(key).getOne().getContent()[column_name],
-        )
-    )
+    collection.find().key(key).replaceOne(content)
     db.close_connection(connection)
 
 
@@ -472,7 +409,6 @@ def extract_matches(region, match_id, db, key):
     )
 
     response = requests.get(request_url, headers=headers)
-    # time.sleep(1.5)  # rate limiting purposes
     if response.status_code != 200:
         print(
             "{} Request error (@extract_matches). HTTP code {}".format(
@@ -480,7 +416,6 @@ def extract_matches(region, match_id, db, key):
             )
         )
         return
-    # Get participants and teams.objectives objects
     o_version = response.json().get("info").get("gameVersion")
     o_participants = response.json().get("info").get("participants")
     o_teams = response.json().get("info").get("teams")
@@ -492,7 +427,6 @@ def extract_matches(region, match_id, db, key):
         "utility": list(),
         "jungle": list(),
     }
-    # Extract individual matchups
     for x in o_participants:
         try:
             matchups["{}".format(x.get("individualPosition").lower())].append(
@@ -511,16 +445,11 @@ def extract_matches(region, match_id, db, key):
                 }
             )
         except KeyError:
-            # Then we have an Invalid position detected (probably AFK). In this case, we ignore it.
             continue
-    # Check lengths to see if any lanes had invalid matchups. In this case, remove them.
     for x, y in matchups.items():
         if len(y) != 2:
-            # print('[ERR] Detected error in {} lane'.format(x))
             continue
         else:
-            # We insert our matchups info into the db
-            # First check which of these are not present.
             match_id = response.json().get("metadata").get("matchId")
             to_insert_obj = {
                 "p_match_id": "{}_{}".format(match_id, x),
@@ -542,72 +471,87 @@ def extract_matches(region, match_id, db, key):
                 )
             )
 
-    # Now, set a processed_1v1 bit in the match
     change_column_value_by_key(db, "match", "processed_1v1", 1, key)
 
     return response.json()
 
 
 def player_list(db):
-    # Get top players from API and add them to our DB.
     for x in request_regions:
-        # RANKED_FLEX_TT disabled since the map was removed
         for y in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]:
             get_top_players(x, y, db)
 
 
 def match_list(db):
-    # From all users in the collection, extract matches
     all_match_ids = list()
-    soda = db.get_connection().getSodaDatabase()
-    collection_summoner = soda.createCollection("summoner")
-    collection_match = soda.createCollection("match")
 
-    all_summoners = collection_summoner.find().getDocuments()
+    query = "SELECT * FROM player_table"
+    result_set = db.execute(query)
+    all_summoners = result_set.fetchall()
 
+    query = "SELECT * FROM match_table"
+
+    random.shuffle(all_summoners)
     for x in all_summoners:
-        current_summoner = x.getContent()
+        current_summoner = x[1]
+        request_region = x[11].lower()
+        print(
+            "[{}][INFO] SUMMONER {} REGION {}".format(
+                time.strftime("%Y-%m-%d %H:%M"), current_summoner, request_region
+            )
+        )
         current_summoner_puuid = get_summoner_information(
-            current_summoner["summonerName"], current_summoner["request_region"]
+            current_summoner, request_region.lower()
         )
         if current_summoner_puuid is None:
             continue
-        for y in ["europe", "americas", "asia"]:
-            for z in ["ranked", "tourney"]:
-                z_match_ids = get_n_match_ids(current_summoner_puuid, 990, z, y)
-                # Insert them into our match collection
-                for i in z_match_ids:
-                    try:
-                        collection_match.insertOne(i)
-                    except exceptions.IntegrityError:
-                        print("Match ID {} already inserted".format(i))
-                        continue
-                    print(
-                        "{} Inserted new match with ID {} from summoner {} in region {}, queue {}".format(
-                            time.strftime("%Y-%m-%d %H:%M"),
-                            i["match_id"],
-                            current_summoner["summonerName"],
-                            y,
-                            z,
-                        )
+        overall_region = determine_overall_region(request_region.lower())[0]
+        z_match_ids = get_n_match_ids(
+            current_summoner_puuid, 990, "ranked", overall_region
+        )
+
+        try:
+            pd_all_matches = pd.DataFrame(db.execute(query).fetchall()).set_axis(
+                ["match_id"], axis=1
+            ) 
+            df = pd.DataFrame(z_match_ids)
+            diff = df[~df.isin(pd_all_matches.to_numpy().flatten())]
+
+            if len(df) != len(diff):
+                print("[{}][FIX]".format(time.strftime("%Y-%m-%d %H:%M")))
+        except ValueError:
+            df = pd.DataFrame(z_match_ids)
+            diff = df
+
+        if not diff.empty:
+            try:
+                diff.to_sql("match_table", db, if_exists="append", index=False)
+                print(
+                    "[{}][ADD] +{}".format(time.strftime("%Y-%m-%d %H:%M"), len(diff))
+                )
+            except sqlite3.IntegrityError as e:
+                print(
+                    "[{}][DUP]: {} {}".format(
+                        time.strftime("%Y-%m-%d %H:%M"), current_summoner, e
                     )
+                )
+                continue
+        else:
+            print(
+                "[{}][INFO] UP TO DATE {}".format(
+                    time.strftime("%Y-%m-%d %H:%M"), current_summoner
+                )
+            )
 
 
 def match_download_standard(db):
-    # We have the match IDs, let's get some info about the games.
     collection_match = db.get_connection().getSodaDatabase().createCollection("match")
     all_match_ids = (
         collection_match.find().filter({"processed_1v1": {"$ne": 1}}).getDocuments()
     )
     for x in all_match_ids:
-        # Get the overall region to make the proper request
         overall_region, tagline = determine_overall_region(
             x.getContent().get("match_id").split("_")[0].lower()
-        )
-        print(
-            "{} Overall Region {} detected".format(
-                time.strftime("%Y-%m-%d %H:%M"), overall_region
-            )
         )
         extract_matches(overall_region, x.getContent().get("match_id"), db, x.key)
 
@@ -618,21 +562,14 @@ def match_download_detail(db):
         collection_match.find().filter({"processed_5v5": {"$ne": 1}}).getDocuments()
     )
     for x in all_match_ids:
-        # Get the overall region to make the proper request
         overall_region, tagline = determine_overall_region(
             x.getContent().get("match_id").split("_")[0].lower()
-        )
-        print(
-            "{} Overall Region {} detected".format(
-                time.strftime("%Y-%m-%d %H:%M"), overall_region
-            )
         )
         match_detail = get_match_timeline(
             x.getContent().get("match_id"), overall_region
         )
         if match_detail:
             db.insert("match_detail", match_detail)
-            # Now, set a processed_5v5 bit in the match in order not to process it again in the future.
             change_column_value_by_key(db, "match", "processed_5v5", 1, x.key)
 
 
@@ -643,15 +580,9 @@ def build_final_object(json_object):
     try:
         match_id = json_object.get("metadata").get("matchId")
     except AttributeError:
-        print(
-            "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
-                time.strftime("%Y-%m-%d %H:%M"), json_object
-            )
-        )
         return
 
     winner = int()
-    # Determine winner
     frames = json_object.get("info").get("frames")
     last_frame = frames[-1]
     last_event = last_frame.get("events")[-1]
@@ -912,22 +843,12 @@ def build_final_object(json_object):
     return all_frames
 
 
-# builds liveclient-affine data object.
 def build_final_object_liveclient(json_object):
     all_frames = list()
     match_id = str()
-    try:
-        match_id = json_object.get("metadata").get("matchId")
-    except AttributeError:
-        print(
-            "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
-                time.strftime("%Y-%m-%d %H:%M"), json_object
-            )
-        )
-        return
+    match_id = json_object.get("metadata").get("matchId")
 
     winner = int()
-    # Determine winner
     frames = json_object.get("info").get("frames")
     last_frame = frames[-1]
     last_event = last_frame.get("events")[-1]
@@ -1075,7 +996,6 @@ def build_final_object_liveclient(json_object):
                         time.strftime("%Y-%m-%d %H:%M"), e
                     )
                 )
-                # if there's a problem with a frame, skip this iteration
                 return list()
 
             if winner == 100:
@@ -1094,34 +1014,24 @@ def build_final_object_liveclient(json_object):
     return all_frames
 
 
-# ------------------
 # CLASSIFIER MODEL (NO LIVE CLIENT API STRUCTURE)
 def process_predictor(db):
     connection = db.get_connection()
     matches = connection.getSodaDatabase().createCollection("match_detail")
-    # Total documents left to process:
-    print(
-        "{} Total match_detail documents (to process): {}".format(
-            time.strftime("%Y-%m-%d %H:%M"),
-            matches.find().filter({"classifier_processed": {"$ne": 1}}).count(),
-        )
-    )
 
     for doc in matches.find().filter({"classifier_processed": {"$ne": 1}}).getCursor():
         content = doc.getContent()
         built_object = build_final_object(content)
         if built_object:
             for x in built_object:
-                res = db.insert("predictor", x)  # insert in new collection.
+                res = db.insert("predictor", x)
                 if res == -1:
-                    # Change column value to processed.
                     print(
                         "{} {}".format(
                             time.strftime("%Y-%m-%d %H:%M"),
                             doc.getContent().get("metadata").get("matchId"),
                         )
                     )
-                    # after processing, update processed bit.
                     change_column_value_by_key(
                         db, "match_detail", "classifier_processed", 1, doc.key
                     )
@@ -1129,7 +1039,6 @@ def process_predictor(db):
     db.close_connection(connection)
 
 
-# CLASSIFIER MODEL (LIVE CLIENT API AFFINITY DATA)
 def process_predictor_liveclient(db):
     connection = db.get_connection()
     matches = connection.getSodaDatabase().createCollection("match_detail")
@@ -1148,16 +1057,12 @@ def process_predictor_liveclient(db):
         .getCursor()
     ):
         content = doc.getContent()
-        # build data similar to the one given by the Live Client API from Riot.
         built_object = build_final_object_liveclient(content)
         if built_object:
             for x in built_object:
-                # insert in new collection.
                 res = db.insert("predictor_liveclient", x)
                 if res == -1:
-                    # Change column value to processed.
                     print(doc.getContent().get("metadata").get("matchId"))
-                    # after processing, update processed bit.
                     change_column_value_by_key(
                         db,
                         "match_detail",
@@ -1169,46 +1074,24 @@ def process_predictor_liveclient(db):
     db.close_connection(connection)
 
 
-"""
-At the time of writing, the following execution modes are available:
-  - **`player_list`**: retrieves the top players from a region and adds them automatically to our database. This includes players above master's elo in League of Legends (read: really good players), which is the kind of data we want if we're going to build a reliable ML model.
-  - **`match_list`**: from all users already present in the database, extract their last 999 matches, or get as many as there are, with the IDs from each one of the games.
-  - **`match_download_standard`**: for every ID in the **`__match__`** collection, get some information about them. This yields data useful to make a 1v1 predictor.
-  - **`match_download_detail`**: for every ID in the **`__match__`** collection, get some global information. This yields data useful to make a 5v5 predictor. It inserts the new data into the **`__match_detail__`** collection.
-  - **`process_predictor`**: uses the **`__match_detail__`** collection and processes the data to build a pandas-friendly object. Aims to predict a win(1) or a loss(0)
-  - **`process_predictor_liveclient`**: similar to **`process_predictor`**, but it has the same column names as the ones we can find in the LiveClient API (what gives us **real-time data**, which means, what we'll be able to use in the end to make real-time predictions)
-  - **`process_regressor`**: similar to **`process_predictor`**, but instead of trying to create a classifier model, it attempts to predict winning probability [0,1].
-  - **`process_regressor_liveclient`**: similar to **`process_regressor`**, but with LiveClient API-compatible names.
-  - **`Default`**: this mode, which basically performs: **`player_list`** -> **`match_list`** -> **`match_download_standard`** -> **`match_download_detail`**.
-
-"""
-
-
 def data_mine(db):
     if args.mode == "player_list":
         player_list(db)
     elif args.mode == "match_list":
         match_list(db)
-    elif args.mode == "match_download_standard":
-        match_download_standard(db)
-    elif args.mode == "match_download_detail":
-        match_download_detail(db)
-    elif args.mode == "process_predictor":
-        process_predictor(db)
-    elif args.mode == "process_predictor_liveclient":
-        process_predictor_liveclient(db)
-    else:  # we execute everything.
+    else:
         player_list(db)
         match_list(db)
-        match_download_standard(db)
-        match_download_detail(db)
 
 
 def main():
-    db = sqlite3.connect("lol_gpt_dev.db")
-    #db = OracleJSONDatabaseThickConnection()
-    data_mine(db)
-    db.close()
+
+    conn = sqlite3.connect("lol_gpt_dev.db")
+
+    data_mine(conn)
+    player_list(conn)
+    match_list(conn)
+    conn.close()
 
 
 if __name__ == "__main__":

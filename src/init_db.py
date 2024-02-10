@@ -14,17 +14,17 @@ def run_init_db():
     a unique match ID. The performance_table stores detailed performance metrics for players in individual matches,
     including kills, deaths, assists, damage dealt, gold earned, and many other statistics.
 
-    The function connects to the SQLite database 'lol_gpt.db', executes SQL commands to create the tables with the
+    The function connects to the SQLite database 'lol_gpt_v2.db', executes SQL commands to create the tables with the
     appropriate schema if they do not exist, and then closes the connection to the database.
 
     Note:
     - This function does not return any value.
-    - It is assumed that the SQLite database file 'lol_gpt.db' is accessible and writable.
+    - It is assumed that the SQLite database file 'lol_gpt_v2.db' is accessible and writable.
     - The function should be called at the start of the application to ensure the database is initialized before
       any data insertion or query operations are performed.
     """
     # Connect to the database
-    conn = sqlite3.connect("lol_gpt.db")
+    conn = sqlite3.connect("lol_gpt_v2.db")
 
     # conn.execute(f'DROP TABLE PLAYER_TABLE')
     definition = "summonerId REAL PRIMARY KEY, summonerName REAL, leaguePoints REAL, rank REAL, wins REAL, losses REAL, veteran REAL, inactive REAL, freshBlood REAL, hotStreak REAL, tier REAL, request_region REAL, queue REAL"
