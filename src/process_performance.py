@@ -1,13 +1,13 @@
 import multiprocessing.pool as mpool
+import os
 import random
 import sqlite3
 import sys
 import time
 
-import numpy as np
 import pandas as pd
 import requests
-import yaml
+from dotenv import load_dotenv
 from rich import print
 
 # if reading from a csv file, we RANDOMLY SHUFFLE the dataset
@@ -17,7 +17,7 @@ from rich import print
 pool = mpool.ThreadPool(19)
 
 # Create a connection to the SQLite database
-conn = sqlite3.connect("example.db", timeout=5)
+conn = sqlite3.connect("lol_gpt_v2.db", timeout=5)
 
 query = "SELECT * FROM match_table"
 result_set = conn.execute(query)
@@ -35,11 +35,9 @@ currently_limited = 0
 print(df.tail(3))
 print("Dataframe length: {}".format(len(df)))
 
-with open("../config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+load_dotenv()
 
-riot_api_key = config["API_TOKEN"]
-
+riot_api_key = os.getenv("RIOT_API_KEY")
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
     "Accept-Language": "en-US,en;q=0.5",
@@ -303,7 +301,7 @@ def process_player_performance(obj, conn):
 
 def run_process_player_performance(row):
     # Create a connection to the SQLite database
-    conn = sqlite3.connect("example.db", timeout=5)
+    conn = sqlite3.connect("lol_gpt_v2.db", timeout=5)
     match_id = row
 
     (rate_limited, results) = get_match_info(

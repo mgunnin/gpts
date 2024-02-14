@@ -6,27 +6,28 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from sqlite3 import IntegrityError
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
+from rich import print
 
 from init_db import run_init_db
 
 # Create a connection to the SQLite database
 conn = sqlite3.connect("lol_gpt_v2.db")
 
-load_dotenv()
-
 run_init_db()
+
+#with open("../config.yaml", "r") as f:
+#    config = yaml.safe_load(f)
 
 riot_api_key = os.getenv("RIOT_API_KEY")
 
 
 home = str(Path.home())
 p = os.path.abspath("..")
-sys.path.insert(1, p)  # add parent directory to path.
-# parse arguments for different execution modes.
+sys.path.insert(1, p)
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",
@@ -46,17 +47,17 @@ args = parser.parse_args()
 
 
 request_regions = [
-    "br1",
-    "eun1",
-    "euw1",
-    "jp1",
-    "kr",
-    "la1",
-    "la2",
+    #"br1",
+    #"eun1",
+    #"euw1",
+    #"jp1",
+    #"kr",
+    #"la1",
+    #"la2",
     "na1",
-    "oc1",
-    "ru",
-    "tr1",
+    #"oc1",
+    #"ru",
+    #"tr1",
 ]
 
 
@@ -99,7 +100,7 @@ def get_puuid(request_ref, summoner_name, region, db):
     return puuid
 
 
-# will return the PUUID but can be changed to return anything.
+# Return the PUUID but can be changed to return anything
 def get_summoner_information(summoner_name, request_region):
     assert request_region in request_regions
 
@@ -155,7 +156,7 @@ def get_champion_mastery(encrypted_summoner_id, request_region):
             ]
             .to_string()
             .split("    ")[1]
-        )  # get the champion name only
+        )
         print(
             "{} Champion ID {} | Champion Name {} | Mastery level {} | Total mastery points {} | Last time played {} | Points until next mastery level {} | Chest granted {} | Tokens earned {}".format(
                 time.strftime("%Y-%m-%d %H:%M"),
@@ -242,33 +243,9 @@ def get_user_leagues(encrypted_summoner_id, request_region):
 
 
 def get_n_match_ids(puuid, num_matches, queue_type, region):
-    """
-    Retrieves a specified number of match IDs for a given player, filtered by queue type and region.
-
-    This function queries the Riot Games API for match IDs based on the player's PUUID, the number of matches requested,
-    the type of queue, and the region where the matches were played. It ensures that the requested parameters are valid
-    and within the allowed ranges or sets. The function iterates through the match list, making multiple requests if necessary
-    (due to the API's limit on the number of match IDs returned per request), and aggregates the match IDs into a list.
-
-    Args:
-        puuid (str): The player's unique PUUID.
-        num_matches (int): The number of match IDs to retrieve. Must be between 0 and 990, inclusive.
-        queue_type (str): The type of queue for which to retrieve match IDs. Must be one of the following:
-                          'ranked', 'tourney', 'normal', 'tutorial'.
-        region (str): The region in which the matches were played. Must be one of the following: 'europe', 'americas', 'asia'.
-
-    Returns:
-        list: A list of dictionaries, each containing a single match ID under the key 'match_id'.
-
-    Raises:
-        AssertionError: If any of the arguments are not within their expected ranges or sets.
-
-    Note:
-        The function includes rate limiting considerations (commented out) to comply with the Riot Games API's rate limits.
-        It also handles HTTP errors by printing an error message with the HTTP status code and the API response.
-    """
     available_regions = ["europe", "americas", "asia"]
-    queue_types = ["ranked", "tourney", "normal", "tutorial"]
+    # queue_types = ["ranked", "tourney", "normal", "tutorial"]
+    queue_types = ["ranked"]
     assert region in available_regions
     assert queue_type in queue_types
     assert num_matches in range(0, 991)
@@ -289,7 +266,6 @@ def get_n_match_ids(puuid, num_matches, queue_type, region):
                     response.json(),
                 )
             )
-        # Return the list of matches.
         for i in response.json():
             returning_object.append({"match_id": i})
         # Modify the next request_url.
@@ -306,17 +282,6 @@ def get_n_match_ids(puuid, num_matches, queue_type, region):
 
 
 def get_match_timeline(match_id, region):
-    """Gets the timeline data for a League of Legends match.
-
-    Args:
-      match_id: The ID of the match to get timeline data for.
-      region: The region the match was played on. Must be one of:
-        'europe', 'americas', 'asia'.
-
-    Returns:
-      The JSON response from the Riot API containing the match timeline data if successful.
-      None if the API request fails.
-    """
     available_regions = ["europe", "americas", "asia"]
     assert region in available_regions
     request_url = (
@@ -335,27 +300,10 @@ def get_match_timeline(match_id, region):
             )
         )
         return None
-    # Return the list of matches.
     return response.json()
 
 
 def get_match_info(match_id, region):
-    """
-    Retrieves detailed information about a specific League of Legends match.
-
-    This function makes a request to the Riot Games API to fetch detailed information about a match given its ID and the region in which the match was played. It constructs a request URL using the match ID and region, sends a GET request to the Riot Games API, and returns the JSON response containing the match details. If the request is successful, it prints the timestamp and the JSON response. In case of a request error, it prints the error along with the HTTP status code and returns None.
-
-    Args:
-        match_id (str): The unique identifier of the match.
-        region (str): The region where the match was played. Must be one of the following: 'europe', 'americas', 'asia'.
-
-    Returns:
-        dict: A dictionary containing the detailed information about the match if the request is successful.
-        None: If the request fails or if an invalid region is provided.
-
-    Raises:
-        AssertionError: If the provided region is not in the list of available regions.
-    """
     available_regions = ["europe", "americas", "asia"]
     assert region in available_regions
     request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
@@ -374,33 +322,8 @@ def get_match_info(match_id, region):
     return response.json()
 
 
+# auxiliary function
 def determine_overall_region(region):
-    """
-    Determines the overall region based on the specific region code provided.
-
-    This function maps a specific region code to its corresponding overall region category used in the Riot Games API. It also generates a tagline for the region based on predefined mappings. The overall region is determined based on the first part of the region code, while the tagline is a more specific identifier, often the uppercase version of the region code or a special abbreviation for certain regions.
-
-    Args:
-        region (str): The specific region code to be mapped. Examples include 'euw1', 'na1', 'br1', etc.
-
-    Returns:
-        tuple: A tuple containing two elements:
-            - The first element is a string representing the overall region ('europe', 'americas', 'asia').
-            - The second element is a string representing the tagline for the region, which is either the uppercase version of the region code or a special abbreviation.
-
-    Raises:
-        ValueError: If the provided region code does not match any of the predefined mappings.
-
-    Examples:
-        >>> determine_overall_region('euw1')
-        ('europe', 'EUW')
-
-        >>> determine_overall_region('na1')
-        ('americas', 'NA')
-
-        >>> determine_overall_region('kr')
-        ('asia', 'KR')
-    """
     overall_region = str()
     tagline = str()
     if region in ["euw1", "eun1", "ru", "tr1"]:
@@ -409,7 +332,6 @@ def determine_overall_region(region):
         overall_region = "americas"
     else:
         overall_region = "asia"
-    # BR1, EUNE, EUW, JP1, KR, LA1, LA2, NA, OCE, RU, TR
     if region in ["br1", "jp1", "kr", "la1", "la2", "ru", "na1", "tr1", "oc1"]:
         tagline = region.upper()
     elif region == "euw1":
@@ -421,41 +343,13 @@ def determine_overall_region(region):
 
 
 def get_top_players(region, queue, db):
-    """
-    Fetches the top players from the Riot Games API for a given region and queue type, and inserts their data into the database.
-
-    This function queries the Riot Games API for the top players in Challenger, Grandmaster, and Master tiers for a specified region and queue type. It compiles a list of players, including their rank, summoner name, and other relevant information, and inserts this data into the database for further processing or analysis.
-
-    Args:
-        region (str): The specific region code to query. Examples include 'euw1', 'na1', 'br1', etc.
-        queue (str): The queue type to query. Valid options are 'RANKED_SOLO_5x5', 'RANKED_FLEX_SR', 'RANKED_FLEX_TT'.
-        db (DatabaseConnection): An instance of the database connection to insert the fetched data.
-
-    Raises:
-        AssertionError: If the provided region is not in the list of valid regions or if the queue type is not valid.
-        RequestException: If there is an issue with the network request to the Riot Games API.
-        JSONDecodeError: If the response from the Riot Games API cannot be decoded.
-
-    Returns:
-        None: The function inserts the fetched data into the database and does not return anything.
-
-    Examples:
-        >>> get_top_players('euw1', 'RANKED_SOLO_5x5', db_instance)
-        None  # Data is inserted into the database, no direct output
-
-    Note:
-        This function requires a valid Riot Games API key set in the headers of the request. The API key should have the necessary permissions to access the league-v4 endpoints.
-    """
     assert region in request_regions
-    assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
+    #assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
+    assert queue in ["RANKED_SOLO_5x5"]
+
     total_users_to_insert = list()
+
     request_urls = [
-        "https://{}.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/{}".format(
-            region, queue
-        ),
-        "https://{}.api.riotgames.com/lol/league/v4/grandmasterleagues/by-queue/{}".format(
-            region, queue
-        ),
         "https://{}.api.riotgames.com/lol/league/v4/masterleagues/by-queue/{}".format(
             region, queue
         ),
@@ -516,14 +410,15 @@ def get_top_players(region, queue, db):
             continue
 
 
-# Helps modify a column value
 def change_column_value_by_key(db, collection_name, column_name, column_value, key):
     connection = db.get_connection()
-    collection = connection.getSodaDatabase().createCollection(collection_name)
-    found_doc = collection.find().key(key).getOne()  # find document by key
+    collection = connection.getSodaDatabase().createCollection(
+        collection_name
+    )
+    found_doc = collection.find().key(key).getOne()
     content = found_doc.getContent()
     content[column_name] = column_value
-    collection.find().key(key).replaceOne(content)  # replace document
+    collection.find().key(key).replaceOne(content)
     print(
         "{} [DBG] UPDATE BIT {}: {}".format(
             time.strftime("%Y-%m-%d %H:%M"),
@@ -599,7 +494,7 @@ def extract_matches(region, match_id, db, key):
             }
             try:
                 db.insert("matchups", to_insert_obj)
-            except exceptions.IntegrityError:
+            except IntegrityError:
                 print(
                     "{} Match details {} already inserted".format(
                         time.strftime("%Y-%m-%d %H:%M"), to_insert_obj.get("p_match_id")
@@ -622,25 +517,22 @@ def player_list(db):
     # Get top players from API and add them to our DB.
     for x in request_regions:
         # RANKED_FLEX_TT disabled since the map was removed
-        for y in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]:
+        #for y in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]:
+        for y in ["RANKED_SOLO_5x5"]:
             get_top_players(x, y, db)
 
 
 def match_list(db):
-    # From all users in the collection, extract matches
     all_match_ids = list()
 
-    # Query section to select all from a table in sqlite3
     query = "SELECT * FROM player_table"
     result_set = db.execute(query)
     all_summoners = result_set.fetchall()
 
-    # get all current matches too
-
     query = "SELECT * FROM match_table"
 
     # print(all_summoners)
-    random.shuffle(all_summoners)  # create some randomness for consequent executions
+    random.shuffle(all_summoners)
     for x in all_summoners:
         # print(x)
         current_summoner = x[1]
@@ -667,10 +559,13 @@ def match_list(db):
                 ["match_id"], axis=1
             )  # .reset_index(drop=True)
             df = pd.DataFrame(z_match_ids)
-            diff = df[~df.isin(pd_all_matches.to_numpy().flatten())]  # FIND DF1 - DF2
+            diff = df[
+                ~df.apply(tuple, axis=1).isin(pd_all_matches.apply(tuple, axis=1))
+            ]  # FIND DF1 - DF2
 
-            if len(df) != len(diff):
-                # Means there are some duplicates inside the db. avoid them.
+            if len(df) != len(
+                diff
+            ):  # this means there are some duplicates inside the db. avoid them.
                 print("[{}][FIX]".format(time.strftime("%Y-%m-%d %H:%M")))
         except ValueError:  # no data in the database so far
             # then we will just insert all of them.
@@ -1019,6 +914,7 @@ def build_final_object(json_object):
     return all_frames
 
 
+# builds liveclient-affine data object.
 def build_final_object_liveclient(json_object):
     all_frames = list()
     match_id = str()
@@ -1234,7 +1130,7 @@ def process_predictor(db):
     db.close_connection(connection)
 
 
-# Classifier Model (LIVE CLIENT API AFFINITY DATA)
+# CLASSIFIER MODEL (LIVE CLIENT API AFFINITY DATA)
 def process_predictor_liveclient(db):
     connection = db.get_connection()
     matches = connection.getSodaDatabase().createCollection("match_detail")
@@ -1279,13 +1175,14 @@ def data_mine(db):
         player_list(db)
     elif args.mode == "match_list":
         match_list(db)
-    else:  # we execute everything.
+    else:
         player_list(db)
         match_list(db)
 
 
 def main():
 
+    # Create a connection to the SQLite database
     conn = sqlite3.connect("lol_gpt_v2.db")
 
     # Create the definition in sql for performance_table, taking all the keys from final_object

@@ -6,16 +6,13 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from sqlite3 import IntegrityError
 
 import pandas as pd
 import requests
-import ujson as json
-import yaml
-from attr import Attribute
 from rich import print
 
 from init_db import run_init_db
-from sqlite3 import IntegrityError
 
 # Create a connection to the SQLite database
 conn = sqlite3.connect("lol_gpt_v2.db")
@@ -50,17 +47,17 @@ args = parser.parse_args()
 
 
 request_regions = [
-    #"br1",
-    #"eun1",
-    #"euw1",
-    #"jp1",
-    #"kr",
-    #"la1",
-    #"la2",
+    "br1",
+    "eun1",
+    "euw1",
+    "jp1",
+    "kr",
+    "la1",
+    "la2",
     "na1",
-    #"oc1",
-    #"ru",
-    #"tr1",
+    "oc1",
+    "ru",
+    "tr1",
 ]
 
 
@@ -325,7 +322,6 @@ def get_match_info(match_id, region):
     return response.json()
 
 
-# auxiliary function
 def determine_overall_region(region):
     overall_region = str()
     tagline = str()
@@ -349,7 +345,6 @@ def get_top_players(region, queue, db):
     assert region in request_regions
     #assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
     assert queue in ["RANKED_SOLO_5x5"]
-    # 
 
     total_users_to_insert = list()
 
@@ -526,7 +521,6 @@ def extract_matches(region, match_id, db, key):
 def player_list(db):
     # Get top players from API and add them to our DB.
     for x in request_regions:
-        # RANKED_FLEX_TT disabled since the map was removed
         #for y in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]:
         for y in ["RANKED_SOLO_5x5"]:
             get_top_players(x, y, db)
@@ -542,7 +536,7 @@ def match_list(db):
     query = "SELECT * FROM match_table"
 
     # print(all_summoners)
-    random.shuffle(all_summoners) 
+    random.shuffle(all_summoners)
     for x in all_summoners:
         # print(x)
         current_summoner = x[1]
@@ -577,8 +571,7 @@ def match_list(db):
                 diff
             ):  # this means there are some duplicates inside the db. avoid them.
                 print("[{}][FIX]".format(time.strftime("%Y-%m-%d %H:%M")))
-        except ValueError:  # no data in the database so far
-            # then we will just insert all of them.
+        except ValueError: 
             df = pd.DataFrame(z_match_ids)
             diff = df
 
@@ -1201,7 +1194,6 @@ def main():
     data_mine(conn)
     player_list(conn)
     match_list(conn)
-    # Close the connection to the SQLite database
     conn.close()
 
 

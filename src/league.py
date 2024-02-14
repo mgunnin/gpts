@@ -1,23 +1,16 @@
 import argparse
 import datetime
 import os
+import sqlite3
 import sys
 import time
 from pathlib import Path
 
 import pandas as pd
 import requests
-import ujson as json
-from attr import Attribute
 from dotenv import load_dotenv
-import sqlite3
-from sqlite3 import IntegrityError
 
-
-#from oracledb import exceptions
-#from utils.oracle_database import OracleJSONDatabaseThickConnection
-
-db = sqlite3.connect("lol_gpt_dev.db")
+db = sqlite3.connect("lol_gpt_v2.db")
 
 
 load_dotenv()
@@ -26,7 +19,7 @@ riot_api_key = os.getenv("RIOT_API_KEY")
 
 home = str(Path.home())
 p = os.path.abspath("..")
-sys.path.insert(1, p)  # add parent directory to path.
+sys.path.insert(1, p)
 # parse arguments for different execution modes.
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -75,8 +68,7 @@ def get_puuid(request_ref, summoner_name, region, db):
         "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}".format(
             request_ref, summoner_name, region
         )
-    )  # europe, JASPERAN, EUW
-
+    )
     response = requests.get(request_url, headers=headers)
     # time.sleep(1)
     if response.status_code == 200:
@@ -100,8 +92,7 @@ def get_puuid(request_ref, summoner_name, region, db):
     return puuid
 
 
-# encrypted summoner ID: y8zda_vuZ5AkVYk8yXJrHa_ppKjIblOGKPCwzYcX9ywo4G0
-# will return the PUUID but can be changed to return anything.
+# Returns the PUUID but can be changed to return anything.
 def get_summoner_information(summoner_name, request_region):
     assert request_region in request_regions
 
@@ -283,7 +274,9 @@ def get_n_match_ids(puuid, num_matches, queue_type, region):
 
 
 def get_match_timeline(match_id, region):
-    available_regions = ["europe", "americas", "asia"]
+    # available_regions = ["europe", "americas", "asia"]
+    available_regions = ["americas"]
+
     assert region in available_regions
     request_url = (
         "https://{}.api.riotgames.com/lol/match/v5/matches/{}/timeline".format(
@@ -348,10 +341,11 @@ def determine_overall_region(region):
 
 def get_top_players(region, queue, db):
     assert region in request_regions
-    assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
+    # assert queue in ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_FLEX_TT"]
+    assert queue in ["RANKED_SOLO_5x5"]
+
 
     total_users_to_insert = list()
-    # master, grandmaster and challenger endpoints
 
     request_urls = [
         "https://{}.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/{}".format(
@@ -435,12 +429,12 @@ def get_top_players(region, queue, db):
                 )
                 continue
         except exceptions.IntegrityError:
-                print(
-                    "{} Summoner {} already inserted".format(
-                        time.strftime("%Y-%m-%d %H:%M"), x["summonerName"]
-                    )
+            print(
+                "{} Summoner {} already inserted".format(
+                    time.strftime("%Y-%m-%d %H:%M"), x["summonerName"]
                 )
-                continue
+            )
+            continue
 
 
 # this function helps modify a column value
@@ -1094,7 +1088,6 @@ def build_final_object_liveclient(json_object):
     return all_frames
 
 
-# ------------------
 # CLASSIFIER MODEL (NO LIVE CLIENT API STRUCTURE)
 def process_predictor(db):
     connection = db.get_connection()
@@ -1112,7 +1105,7 @@ def process_predictor(db):
         built_object = build_final_object(content)
         if built_object:
             for x in built_object:
-                res = db.insert("predictor", x)  # insert in new collection.
+                res = db.insert("predictor", x)
                 if res == -1:
                     # Change column value to processed.
                     print(
@@ -1205,7 +1198,7 @@ def data_mine(db):
 
 
 def main():
-    db = sqlite3.connect("lol_gpt_dev.db")
+    db = sqlite3.connect("lol_gpt_v2.db")
     #db = OracleJSONDatabaseThickConnection()
     data_mine(db)
     db.close()

@@ -10,13 +10,13 @@
    `python src/init_db.py`
 
 2. Extract player data
-   `python src/cloudshell_league.py`
+   `python src/sqlite_league.py`
 
 3. Extract previously played matches' ID from pool of players in the database
-   `python src/cloudshell_league.py --mode="match_list"`
+   `python src/sqlite_league.py --mode="match_list"`
 
 4. Process each player's performance
-   `python src/cloudshell_process_performance.py`
+   `python src/process_performance.py`
 
 5. Generate 3 csv files from database
    `python src/read_data.py`

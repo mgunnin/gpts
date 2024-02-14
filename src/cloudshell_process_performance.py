@@ -18,11 +18,11 @@ from rich import print
 pool = mpool.ThreadPool(19)
 
 # Create a connection to the SQLite database
-conn = sqlite3.connect("lol_gpt.db", timeout=5)
+conn = sqlite3.connect("lol_gpt_v3.db", timeout=5)
 
 query = "SELECT * FROM match_table"
 result_set = conn.execute(query)
-all_matches = result_set.fetchall()  # create some randomness for consequent executions
+all_matches = result_set.fetchall()
 random.shuffle(all_matches)
 
 df = pd.DataFrame(all_matches, columns=["match_id"])
@@ -38,14 +38,14 @@ print("Dataframe length: {}".format(len(df)))
 
 load_dotenv()
 
-riot_api_key = os.getenv("RIOT_API_KEY")
+RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
     "Accept-Language": "en-US,en;q=0.5",
     "Accept-Charset": "application/x-www-form-urlencoded; charset=UTF-8",
     "Origin": "https://developer.riotgames.com",
-    "X-Riot-Token": riot_api_key,
+    "X-Riot-Token": RIOT_API_KEY,
 }
 
 
@@ -125,7 +125,9 @@ def get_match_info(match_id, region):
     - The Riot Games API requires an API key, which should be included in the request headers.
     - Rate limiting is common with the Riot Games API, and appropriate handling is necessary to avoid being blocked.
     """
-    available_regions = ["europe", "americas", "asia"]
+    # available_regions = ["europe", "americas", "asia"]
+    available_regions = ["americas"]
+
     assert region in available_regions
     request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
         region, match_id
@@ -379,16 +381,14 @@ def run_process_player_performance(row):
     - It is part of a larger system that processes match data for analysis and storage.
     """
     # Create a connection to the SQLite database
-    conn = sqlite3.connect("lol_gpt.db", timeout=5)
+    conn = sqlite3.connect('lol_gpt_v3.db', timeout=5)
     match_id = row
 
-    (rate_limited, results) = get_match_info(
-        match_id, determine_overall_region(str(match_id).split("_")[0].lower())[0]
-    )
+    (rate_limited, results) = get_match_info(match_id, determine_overall_region(str(match_id).split('_')[0].lower())[0])
     global currently_limited
     if rate_limited == 1:
         currently_limited = rate_limited
-    # time.sleep(24)
+    #time.sleep(24)
 
     if results is None:
         return
@@ -396,8 +396,8 @@ def run_process_player_performance(row):
     penalty = process_player_performance(results, conn)
 
 
-# iter = 0
-df = df["match_id"]  # only get the column we want.
+# Prepare the DataFrame by selecting only the 'match_id' column
+df = df[["match_id"]]
 # Iterate over df
 for i in range(1, len(df), 19):  # step 3 since our batch size = 3.
     try:  # create batch
