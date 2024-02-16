@@ -19,7 +19,7 @@ conn = sqlite3.connect("lol_gpt_v2.db")
 
 run_init_db()
 
-#with open("../config.yaml", "r") as f:
+# with open("../config.yaml", "r") as f:
 #    config = yaml.safe_load(f)
 
 riot_api_key = os.getenv("RIOT_API_KEY")
@@ -571,7 +571,7 @@ def match_list(db):
                 diff
             ):  # this means there are some duplicates inside the db. avoid them.
                 print("[{}][FIX]".format(time.strftime("%Y-%m-%d %H:%M")))
-        except ValueError: 
+        except ValueError:
             df = pd.DataFrame(z_match_ids)
             diff = df
 
