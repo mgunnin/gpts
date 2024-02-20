@@ -2,7 +2,8 @@
 /tools/gpt-crawler
 /reference
 /routes/__pycache__
-/lol_gpt.db
 /lol_gpt_v2.db
+/lol_gpt_v3.db
 /config.yaml
 /item_recommender/.env
+/db.load

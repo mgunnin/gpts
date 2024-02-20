@@ -25,3 +25,4 @@ scikit-learn
 matplotlib
 aiosqlite
 ujson
+supabase

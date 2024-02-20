@@ -520,8 +520,10 @@ class RiotAPI:
 
 
     def match_download_standard(self, db):
-        query = "SELECT * FROM match WHERE processed_1v1 != 1"
-        all_match_ids = db.execute(query).fetchall()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        query = "SELECT * FROM match_table WHERE processed_1v1 != 1"
+        all_match_ids = cursor.execute(query).fetchall()
         for x in all_match_ids:
             overall_region, tagline = self.determine_overall_region(
                 x[0].split("_")[0].lower()

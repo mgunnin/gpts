@@ -17,5 +17,5 @@ definition = 'summonerId REAL PRIMARY KEY, summonerName REAL, leaguePoints REAL,
 conn.execute(f'CREATE TABLE IF NOT EXISTS player_table ({definition})')
 
 #conn.execute(f'DROP TABLE match_table')
-definition = 'match_id REAL PRIMARY KEY'   
+definition = 'match_id REAL PRIMARY KEY'
 conn.execute(f'CREATE TABLE IF NOT EXISTS match_table ({definition})')
