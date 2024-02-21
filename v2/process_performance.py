@@ -13,7 +13,6 @@ from rich import print
 # if reading from a csv file, we RANDOMLY SHUFFLE the dataset
 # df = df.sample(frac=1)
 
-# create 19 worker threads
 pool = mpool.ThreadPool(19)
 
 # Create a connection to the SQLite database
@@ -57,14 +56,12 @@ def determine_overall_region(region):
         overall_region = "americas"
     else:
         overall_region = "asia"
-    # BR1, EUNE, EUW, JP1, KR, LA1, LA2, NA, OCE, RU, TR
     if region in ["br1", "jp1", "kr", "la1", "la2", "ru", "na1", "tr1", "oc1"]:
         tagline = region.upper()
     elif region == "euw1":
         tagline = "EUW"
     elif region == "eun1":
         tagline = "EUNE"
-    # 3 cases left: OCE
     return overall_region, tagline
 
 
@@ -143,9 +140,7 @@ def process_player_performance(obj, conn):
 
     # flatten json object to csv format
 
-    # obj['participants'][0]['win'] -> to predict
-
-    # and also, to predict player performance -> or take as input for now.
+    # obj['participants'][0]['win'] -> to predict and also, to predict player performance -> or take as input for now.
 
     for i in range(len(obj["info"]["participants"])):
 
@@ -300,7 +295,6 @@ def process_player_performance(obj, conn):
 
 
 def run_process_player_performance(row):
-    # Create a connection to the SQLite database
     conn = sqlite3.connect("lol_gpt_v3.db", timeout=5)
     match_id = row
     region = determine_overall_region(str(match_id).split("_")[0].lower())[0]
@@ -316,16 +310,12 @@ def run_process_player_performance(row):
         currently_limited = rate_limited
 
     if results is None:
+        process_player_performance(results, conn)
         return
 
-    # penalty = process_player_performance(results, conn)
 
-
-# iter = 0
-df = df["match_id"]  # only get the column we want.
-# Iterate over df
 for i in range(1, len(df), 19):  # step 3 since our batch size = 3.
-    try:  # create batch
+    try:
         sync_1 = df.iloc[i]
         sync_2 = df.iloc[i + 1]
         sync_3 = df.iloc[i + 2]
@@ -349,8 +339,7 @@ for i in range(1, len(df), 19):  # step 3 since our batch size = 3.
         # print(sync_1, sync_2, sync_3, sync_4, sync_5)
     except Exception as e:
         print(e)
-    # for row, index in df.iterrows():
-    # get the total number of active workers in the pool
+    # for row, index in df.iterrows(): get the total number of active workers in the pool
     if currently_limited == 1:
         print("Rate limited. Sleeping for 2 minutes...")
         time.sleep(120)

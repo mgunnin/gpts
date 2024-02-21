@@ -2,7 +2,6 @@ import os
 import time
 
 import aiosqlite
-import openai
 from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -10,11 +9,23 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 LOL_COACH_ASSISTANT_ID = assistant_id = os.getenv("LOL_COACH_ASSISTANT_ID")
 
 # Create an OpenAI assistant
-# assistant = client.beta.assistants.create(
-#     name="LoL Coach Assistant",
-#     instructions="You are a coach providing advice to a League of Legends player based on their match performance.",
-#     model="gpt-4-1106-preview",
-# )
+def create_assistant():
+    return client.beta.assistants.create(
+        name="LoL Coach Assistant",
+        instructions="You are a coach providing advice to a League of Legends player based on their match performance.",
+        model="gpt-4-1106-preview",
+    )
+
+def update_assistant():
+    assistant = client.beta.assistants.update(
+        LOL_COACH_ASSISTANT_ID,
+        tools=[
+            {"type": "code_interpreter"},
+            {"type": "retrieval"},
+            {"type": "function", "function": function_json},
+        ],
+    )
+    show_json(assistant)
 
 
 # Create a thread and submit a message
@@ -40,11 +51,14 @@ def create_thread_and_run(user_input):
 
 
 # Emulating concurrent user requests
-thread1, run1 = create_thread_and_run(
+thread_1, run_1 = create_thread_and_run(
     "I need help with improving my League of Legends gameplay. Can you analyze my match history and provide some advice?"
 )
-thread2, run2 = create_thread_and_run("How can I be a better team player?")
-thread3, run3 = create_thread_and_run(
+thread_2, run_2 = create_thread_and_run(
+    "How can I be a better team player?"
+)
+
+thread_3, run_3 = create_thread_and_run(
     "What are some advanced strategies for playing League of Legends?"
 )
 
@@ -69,21 +83,21 @@ def wait_on_run(run, thread):
 
 
 # Wait for Run 1
-run1 = wait_on_run(run1, thread1)
-pretty_print(get_response(thread1))
+run_1 = wait_on_run(run_1, thread_1)
+pretty_print(get_response(thread_1))
 
 # Wait for Run 2
-run2 = wait_on_run(run2, thread2)
-pretty_print(get_response(thread2))
+run_2 = wait_on_run(run_2, thread_2)
+pretty_print(get_response(thread_2))
 
 # Wait for Run 3
-run3 = wait_on_run(run3, thread3)
-pretty_print(get_response(thread3))
+run_3 = wait_on_run(run_3, thread_3)
+pretty_print(get_response(thread_3))
 
 # Thank our assistant on Thread 3 :)
-run4 = submit_message(LOL_COACH_ASSISTANT_ID, thread3, "Thank you!")
-run4 = wait_on_run(run4, thread3)
-pretty_print(get_response(thread3))
+run_4 = submit_message(LOL_COACH_ASSISTANT_ID, thread_3, "Thank you!")
+run_4 = wait_on_run(run_4, thread_3)
+pretty_print(get_response(thread_3))
 
 
 # Analyze match history and provide advice to the player

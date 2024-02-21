@@ -17,7 +17,6 @@ pandas >= 1.4.0
 riotwatcher >= 3.2.0
 cassiopeia
 tqdm >= 4.64.0
-zilean == 0.0.2
 python-dotenv
 setuptools
 sortedcontainers

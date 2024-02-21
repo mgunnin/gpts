@@ -19,6 +19,8 @@ def data_mine(db, mode):
     else:
         api.player_list()
         api.match_list()
+        api.match_download_standard(db)
+        api.match_download_detail(db)
 
 def main(mode):
     db = Database("lol_gpt_v3.db")

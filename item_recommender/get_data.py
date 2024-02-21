@@ -107,7 +107,7 @@ async def get_champ_mastery(summid_to_puuid, points=100000):
         url = f"https://{region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}"
         response_data, status_code = await get_api_response(
             url, headers
-        )  # Adjusted this line
+        )
 
         if (
             status_code != 200 or response_data is None
@@ -300,11 +300,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # riot games api key
-    # api_key = args.key
-    api_key = "RGAPI-de85bb37-76e5-6890-9a94-fcf7b1bf14a6"
+    api_key = args.key
     # set region, init lol watcher obj
-    # region = args.region
-    region = "na1"
+    region = args.region
 
     lol_obj = LolInterface(api_key=api_key)
     logging.info("LolWatcher object created.")

@@ -15,7 +15,6 @@ class RiotAPI:
     def __init__(self, db):
         self.db = db
         self.riot_api_key = os.getenv("RIOT_API_KEY")
-        print("Debug API Key:", self.riot_api_key)
         self.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
             "Accept-Language": "en-US,en;q=0.5",
@@ -537,6 +536,22 @@ class RiotAPI:
 
 
     def match_download_detail(self, db):
+        """
+        Downloads detailed match information for matches that have not been processed for 5v5 analysis.
+
+        This function queries the 'match' table in the database for match IDs that have not been processed for 5v5
+        match detail analysis (indicated by the 'processed_5v5' column not being set to 1). For each unprocessed match,
+        it determines the overall region, fetches detailed match information, and inserts it into the 'match_detail'
+        table. It also updates the 'processed_5v5' status for the match in the 'match' table to prevent reprocessing.
+
+        The function handles exceptions that may occur during the database operations, such as IntegrityError, which indicates a duplicate entry attempt. In such cases, it logs the error and continues with the next match ID.
+
+        Parameters:
+            db (Database): The database object that provides a connection to the database and methods to execute database operations.
+
+        Returns:
+            None
+        """
         query = "SELECT * FROM match WHERE processed_5v5 != 1"
         all_match_ids = db.execute(query).fetchall()
         for x in all_match_ids:
