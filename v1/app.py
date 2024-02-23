@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from exceptions import MissingEnvironmentVariableError
+from v1.exceptions import MissingEnvironmentVariableError
 from routes.cassio import cass_router
 from routes.routes import router
 from routes.watcher import watcher_router

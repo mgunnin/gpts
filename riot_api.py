@@ -9,7 +9,6 @@ import requests
 
 riot_api_key = os.getenv("RIOT_API_KEY")
 
-
 class RiotAPI:
 
     def __init__(self, db):
@@ -86,6 +85,23 @@ class RiotAPI:
 
 
     def get_champion_mastery(self, encrypted_summoner_id, request_region):
+        """
+        Retrieves the champion mastery information for a given summoner.
+
+        This method fetches the champion mastery details for the specified encrypted summoner ID from the Riot Games API. It constructs a request URL using the provided `request_region` and `encrypted_summoner_id`, sends a GET request to the Riot Games API, and processes the response.
+
+        If the request is successful (HTTP status code 200), it prints the response JSON to the console, along with the current timestamp. It then reads the champion IDs from a CSV file, matches them with the champion IDs in the response, and prints detailed mastery information for each champion, including the champion name, mastery level, total mastery points, last time played, points until next mastery level, whether a chest has been granted, and tokens earned.
+
+        If the request fails, it prints an error message with the HTTP status code.
+
+        Parameters:
+        - encrypted_summoner_id (str): The encrypted summoner ID for which to retrieve champion mastery information.
+        - request_region (str): The region from which to request the data. Must be one of the regions specified in `self.request_regions`.
+
+        Returns:
+        None. The function prints the champion mastery information to the console.
+        """
+        response_data = []
         assert request_region in self.request_regions
 
         request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{}".format(
@@ -94,7 +110,8 @@ class RiotAPI:
 
         response = requests.get(request_url, headers=self.headers)
         if response.status_code == 200:
-            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
+            response_data = response.json()
+            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response_data))
         else:
             print(
                 "{} Request error (@get_champion_mastery). HTTP code {}".format(
@@ -102,14 +119,14 @@ class RiotAPI:
                 )
             )
 
-        champion_df = pd.read_csv("../data/champion_ids.csv")
+        champion_df = pd.read_csv("data/champion_ids.csv")
 
         print(
             "{} Total champions played: {}".format(
-                time.strftime("%Y-%m-%d %H:%M"), len(response.json())
+                time.strftime("%Y-%m-%d %H:%M"), len(response_data)
             )
         )
-        for i in response.json():
+        for i in response_data:
             champion_name = (
                 champion_df.loc[champion_df["champion_id"] == i.get("championId")][
                     "champion_name"
@@ -266,17 +283,23 @@ class RiotAPI:
         request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
             region, match_id
         )
+        print(match_id)
 
         response = requests.get(request_url, headers=self.headers)
+
+        rate_limited = 0
         if response.status_code == 200:
-            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
+          pass
+        elif response.status_code == 429:
+            rate_limited = 1
         else:
             print(
                 "{} Request error (@get_match_info). HTTP code {}".format(
                     time.strftime("%Y-%m-%d %H:%M"), response.status_code
                 )
             )
-        return response.json()
+            return None
+        return rate_limited, response.json()
 
 
     def determine_overall_region(self, region):
@@ -439,15 +462,6 @@ class RiotAPI:
         db.execute("UPDATE match SET processed_1v1 = 1 WHERE key = ?", (key,))
 
         return response.json()
-
-
-    # def player_list(self):
-    #     for region in self.request_regions:
-    #         self.get_top_players(region, "RANKED_SOLO_5x5", self.db)
-    #     query = "SELECT * FROM player_table"
-    #     result_set = self.db.execute(query)
-    #     all_summoners = result_set.fetchall()
-    #     return all_summoners
 
 
     def player_list(self):

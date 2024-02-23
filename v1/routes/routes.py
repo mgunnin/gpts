@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import FileResponse
 
-from models import MassRegion, Region, SummonerData
-from utils import get_api_response
+from v1.models import MassRegion, Region, SummonerData
+from v1.utils import get_api_response
 
 load_dotenv()
 

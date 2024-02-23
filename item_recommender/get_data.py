@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from requests.exceptions import ConnectionError
 from riotwatcher import ApiError, LolWatcher
 
-from utils import get_api_response
+from v1.utils import get_api_response
 
 logging.basicConfig(level=logging.INFO)
 

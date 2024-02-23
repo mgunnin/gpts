@@ -4,7 +4,7 @@ import cassiopeia as cass
 from dotenv import load_dotenv
 from fastapi import APIRouter
 
-from models import MassRegion, SummonerData
+from v1.models import MassRegion, SummonerData
 
 load_dotenv()
 
