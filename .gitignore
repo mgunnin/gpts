@@ -7,3 +7,4 @@
 /config.yaml
 /item_recommender/.env
 /db.load
+data/riot_data

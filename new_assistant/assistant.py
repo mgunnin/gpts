@@ -25,7 +25,7 @@ def update_assistant():
             {"type": "function", "function": function_json},
         ],
     )
-    show_json(assistant)
+    print(assistant)
 
 
 # Create a thread and submit a message
@@ -127,8 +127,7 @@ async def analyze_and_provide_advice(puuid: str):
                     },
                     {
                         "role": "user",
-                        "content": summary
-                        + "\nWhat advice would you give to the player?",
+                        "content": summary + "\nWhat advice would you give to the player?",
                     },
                 ],
                 temperature=0.5,

@@ -109,6 +109,8 @@ class RiotAPI:
         )
 
         response = requests.get(request_url, headers=self.headers)
+        print("Request URL: {}".format(request_url))
+        print("Response Status Code: {}".format(response.status_code))
         if response.status_code == 200:
             response_data = response.json()
             print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response_data))
