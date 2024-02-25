@@ -3,9 +3,9 @@ import os
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from pg_database import Database, ProcessPerformance
+from database_pg import Database, ProcessPerformance
+from exceptions import MissingEnvironmentVariableError
 from riot_api import RiotAPI
-from v1.exceptions import MissingEnvironmentVariableError
 
 ORIGINS = os.getenv("ORIGINS")
 if not ORIGINS:
@@ -40,8 +40,6 @@ async def lifespan(app: FastAPI):
 # API endpoints
 @app.get("/summoner/{summoner_name}")
 async def get_summoner_info(summoner_name: str, region: str = "na1"):
-    """Retrieves summoner information using the Riot API."""
-
     try:
         riot_api = RiotAPI(db)
         summoner_info = riot_api.get_summoner_information(summoner_name, region)
@@ -49,22 +47,20 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
     except Exception as e:
         return {"error": f"Error retrieving summoner information: {e}"}
 
-@app.get("/champion_mastery/{summoner_id}")
-async def get_champion_mastery(summoner_id: str, region: str = "na1"):
+@app.get("/champion_mastery/{puuid}")
+async def get_champion_mastery(puuid: str, region: str = "na1"):
     try:
         riot_api = RiotAPI(db)
-        champion_mastery = riot_api.get_champion_mastery(summoner_id, region)
+        champion_mastery = riot_api.get_champion_mastery(puuid, region)
         return champion_mastery
     except Exception as e:
         return {"error": f"Error retrieving champion mastery: {e}"}
 
 @app.get("/match_list/{puuid}")
 async def get_match_list(puuid: str, num_matches: int = 10, queue_type: str = "ranked", region: str = "americas"):
-    """Retrieves a list of match IDs using the Riot API."""
-
     try:
         riot_api = RiotAPI(db)
-        match_list = riot_api.get_n_match_ids(puuid, num_matches, queue_type, region)
+        match_list = riot_api.get_match_ids(puuid, num_matches, queue_type, region)
         return match_list
     except Exception as e:
         return {"error": f"Error retrieving match list: {e}"}

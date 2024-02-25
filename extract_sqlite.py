@@ -5,7 +5,7 @@ import sqlite3
 import pandas as pd
 from dotenv import load_dotenv
 
-from database import Database
+from database_sqlite import Database
 from riot_api import RiotAPI
 
 conn = sqlite3.connect("lol_gpt_v3.db", timeout=5)

@@ -1,0 +1,76 @@
+Instructions
+
+1. Create a table name "top_champion_players" in the database for "lol_champion_player_ranks_1-5.csv" and load the data into the table. This csv has champion, region, rank, tier & summoner_name columns.
+1.1 Because the summoner may be listed more than once in the csv, the table should only contain unique summoner names.
+1.2 For summoners that are listed in more than 1 champion, the table should contain a separate column for each champion they are listed for.
+2. Using the summoner name and region, retrieve the summoner details for each player, including their accountId, puuid and profileIconID and add it to the table as a new columns.
+3. Create a new table for the summoner's match history and load the data into the table
+4. Allow the user to input a summoner name and region and then retrieve the summoner's match history and store it in a separate table.
+5. ChatGPT will be used to provide coaching tips based on the summoner's match history. The GPT will provide tips on how to improve the summoner's gameplay based on the match history data.
+6. The GPT will store the conversations as threads using the OpenAI Assistants API.
+
+
+
+
+To enhance the OpenAI GPT Assistant for League of Legends coaching, we can incorporate several new features based on the Riot Games API Operations and OpenAI Assistants documentation. Here's a list of potential features to consider:
+
+1. Summoner Progress Tracking:
+- Implement a system to track the user's summoner statistics over time, allowing for progress analysis.
+- Store historical data of matches, including wins, losses, KDA (Kills/Deaths/Assists), and other relevant stats.
+- Provide visual progress reports, such as graphs or charts, to show improvement areas.
+
+2. Personalized Coaching Tips:
+- Analyze match data to offer personalized tips on gameplay, such as positioning, item builds, and skill usage.
+- Use natural language processing to generate human-like coaching advice.
+
+3. Thread-Based Interaction:
+- Utilize threads to maintain a continuous conversation with the user, enabling them to pick up where they left off.
+- Implement a system to reference past interactions and provide contextually relevant follow-ups.
+
+4. Performance Benchmarks:
+- Compare the user's performance against benchmarks for their rank or the average statistics for the champions they play.
+- Offer insights on how to reach the next level of play based on these benchmarks.
+
+5. Goal Setting and Tracking:
+- Allow users to set specific goals, such as improving their CS (creep score) or reducing their average deaths per game.
+- Track these goals over time and notify users of their progress.
+
+6. Match History Analysis:
+- Provide in-depth analysis of recent matches, highlighting strengths and areas for improvement.
+- Include insights on team composition, match phases, and objective control.
+
+7. Champion Mastery Insights:
+- Offer advice on which champions to focus on based on user performance and playstyle.
+- Suggest new champions to learn that fit the user's preferred roles or complement their existing pool.
+
+8. Integration with Community Resources:
+- Link to community guides, videos, and other educational content relevant to the user's learning path.
+- Collaborate with established coaches or high-elo players to provide expert insights.
+
+9. Real-Time Game Feedback:
+- If possible, integrate with live game data to offer real-time advice during matches.
+- Provide post-game analysis with actionable feedback for the next game.
+
+10. Social Features:
+- Allow users to share their progress and achievements with friends or on social media.
+- Create a community within the app for users to discuss strategies and improvement tips.
+
+11. User Authentication and Profile Management:
+- Implement user authentication to securely manage user data and preferences.
+- Allow users to customize their profile and coaching experience.
+
+12. API Rate Limit Management:
+- Efficiently manage API calls to stay within the rate limits imposed by the Riot Games API.
+- Implement caching strategies to reduce the number of API calls needed.
+
+13. Error Handling and User Feedback:
+- Provide clear error messages and guidance when the API is unavailable or the user enters invalid information.
+- Implement a feedback system for users to report issues or suggest improvements.
+
+To organize and ease development, consider the following:
+
+- Modularize the codebase: Break down the features into separate modules or services to make the codebase more manageable.
+- Use version control: Implement a version control system like Git to track changes and collaborate with other developers.
+- Implement testing: Write unit tests and integration tests to ensure the reliability of the application.
+- Continuous integration/continuous deployment (CI/CD): Set up CI/CD pipelines to automate testing and deployment processes.
+- Documentation: Maintain clear and up-to-date documentation for the codebase and API usage.

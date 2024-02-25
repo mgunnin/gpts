@@ -32,7 +32,6 @@ class Database:
     def run_init_db(self):
         conn = self.get_connection()
 
-        # Table definitions for PostgreSQL (adjust data types as needed)
         player_table_def = """
             CREATE TABLE IF NOT EXISTS player_table (
                 summonerId TEXT PRIMARY KEY,

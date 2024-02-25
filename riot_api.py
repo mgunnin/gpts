@@ -84,36 +84,34 @@ class RiotAPI:
         return response.json().get("puuid")
 
 
-    def get_champion_mastery(self, encrypted_summoner_id, request_region):
+    def get_champion_mastery(self, puuid, request_region):
         """
         Retrieves the champion mastery information for a given summoner.
 
-        This method fetches the champion mastery details for the specified encrypted summoner ID from the Riot Games API. It constructs a request URL using the provided `request_region` and `encrypted_summoner_id`, sends a GET request to the Riot Games API, and processes the response.
+        This method fetches the champion mastery details for the specified encrypted summoner ID from the Riot Games API. It constructs a request URL using the provided `request_region` and `puuid`, sends a GET request to the Riot Games API, and processes the response.
 
         If the request is successful (HTTP status code 200), it prints the response JSON to the console, along with the current timestamp. It then reads the champion IDs from a CSV file, matches them with the champion IDs in the response, and prints detailed mastery information for each champion, including the champion name, mastery level, total mastery points, last time played, points until next mastery level, whether a chest has been granted, and tokens earned.
 
         If the request fails, it prints an error message with the HTTP status code.
 
         Parameters:
-        - encrypted_summoner_id (str): The encrypted summoner ID for which to retrieve champion mastery information.
+        - puuid (str): The encrypted summoner ID for which to retrieve champion mastery information.
         - request_region (str): The region from which to request the data. Must be one of the regions specified in `self.request_regions`.
 
         Returns:
         None. The function prints the champion mastery information to the console.
         """
-        response_data = []
         assert request_region in self.request_regions
 
         request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{}".format(
-            request_region, encrypted_summoner_id
+            request_region, puuid
         )
 
         response = requests.get(request_url, headers=self.headers)
         print("Request URL: {}".format(request_url))
         print("Response Status Code: {}".format(response.status_code))
         if response.status_code == 200:
-            response_data = response.json()
-            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response_data))
+            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
         else:
             print(
                 "{} Request error (@get_champion_mastery). HTTP code {}".format(
@@ -125,10 +123,10 @@ class RiotAPI:
 
         print(
             "{} Total champions played: {}".format(
-                time.strftime("%Y-%m-%d %H:%M"), len(response_data)
+                time.strftime("%Y-%m-%d %H:%M"), len(response.json())
             )
         )
-        for i in response_data:
+        for i in response.json():
             champion_name = (
                 champion_df.loc[champion_df["champion_id"] == i.get("championId")][
                     "champion_name"
@@ -153,10 +151,10 @@ class RiotAPI:
             )
 
 
-    def get_total_champion_mastery_score(self, encrypted_summoner_id, request_region):
+    def get_total_champion_mastery_score(self, puuid, request_region):
         assert request_region in self.request_regions
         request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-summoner/{}".format(
-            request_region, encrypted_summoner_id
+            request_region, puuid
         )
 
         response = requests.get(request_url, headers=self.headers)
@@ -170,11 +168,11 @@ class RiotAPI:
             )
 
 
-    def get_user_leagues(self, encrypted_summoner_id, request_region):
+    def get_user_leagues(self, puuid, request_region):
         assert request_region in self.request_regions
         request_url = (
             "https://{}.api.riotgames.com/lol/league/v4/entries/by-summoner/{}".format(
-                request_region, encrypted_summoner_id
+                request_region, puuid
             )
         )
 
@@ -221,7 +219,7 @@ class RiotAPI:
                 )
 
 
-    def get_n_match_ids(self, puuid, num_matches, queue_type, region):
+    def get_match_ids(self, puuid, num_matches, queue_type, region):
         available_regions = ["europe", "americas", "asia"]
         queue_types = ["ranked"]
         assert region in available_regions
@@ -494,7 +492,7 @@ class RiotAPI:
             if current_summoner_puuid is None:
                 continue
             overall_region = self.determine_overall_region(request_region.lower())[0]
-            z_match_ids = self.get_n_match_ids(
+            z_match_ids = self.get_match_ids(
                 current_summoner_puuid, 990, "ranked", overall_region
             )
 
