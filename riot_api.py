@@ -168,11 +168,11 @@ class RiotAPI:
             )
 
 
-    def get_user_leagues(self, puuid, request_region):
-        assert request_region in self.request_regions
+    def get_summoner_leagues(self, summonerId, region):
+        assert region in self.request_regions
         request_url = (
             "https://{}.api.riotgames.com/lol/league/v4/entries/by-summoner/{}".format(
-                request_region, puuid
+                region, summonerId
             )
         )
 
@@ -181,7 +181,7 @@ class RiotAPI:
             print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
         else:
             print(
-                "{} Request error (@get_user_leagues). HTTP code {}".format(
+                "{} Request error (@get_summoner_leagues). HTTP code {}".format(
                     time.strftime("%Y-%m-%d %H:%M"), response.status_code
                 )
             )

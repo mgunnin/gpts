@@ -36,7 +36,7 @@ async def populate_database():
         for queue in ["RANKED_SOLO_5x5"]:
             riot_api.get_top_players(region, queue, db)
 
-async def lifespan(app: FastAPI):
+async def lifespan():
     """
     Lifespan event handler that adds the background task to populate the database.
     """
@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
 
 # API endpoints
 @app.get("/summoner/{summoner_name}")
-async def get_summoner_info(summoner_name: str, region: str = "na1"):
+async def get_summoner_information(summoner_name: str, region: str = "na1"):
     """
     Retrieves summoner information based on the summoner name and region.
 
@@ -92,6 +92,17 @@ async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
         return total_champion_mastery_score
     except Exception as e:
         return {"error": f"Error retrieving total champion mastery score: {e}"}
+
+
+@app.get("/summoner/leagues/{summonerId}")
+async def get_summoner_leagues(summonerId: str, region: str = "na1"):
+    try:
+        riot_api = RiotAPI(db)
+        summoner_leagues = riot_api.get_summoner_leagues(summonerId, region)
+        return summoner_leagues
+    except Exception as e:
+        return {"error": f"Error retrieving summoner leagues: {e}"}
+
 
 
 @app.get("/match_list/{puuid}")
