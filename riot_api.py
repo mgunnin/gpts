@@ -1,10 +1,10 @@
 import datetime
 import os
 import random
-import sqlite3
 import time
 
 import pandas as pd
+import psycopg2
 import requests
 
 riot_api_key = os.getenv("RIOT_API_KEY")
@@ -323,9 +323,7 @@ class RiotAPI:
     def get_top_players(self, region, queue, db):
         assert region in self.request_regions
         assert queue in ["RANKED_SOLO_5x5"]
-
         total_users_to_insert = list()
-
         request_urls = [
             "https://{}.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/{}".format(
                 region, queue
@@ -337,7 +335,6 @@ class RiotAPI:
                 region, queue
             ),
         ]
-
         for x in request_urls:
             response = requests.get(x, headers=self.headers)
             if response.status_code == 200:
@@ -376,18 +373,35 @@ class RiotAPI:
             )
         )
 
-        for x in total_users_to_insert:
-            df = pd.DataFrame(x, index=[0])
-
+        insert_query = """
+    INSERT INTO player_table (summonerId, summonerName, leaguePoints, rank, wins, losses, veteran, inactive, freshBlood, hotStreak, tier, request_region, queue)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (summonerId) DO NOTHING
+    """
+        for player in total_users_to_insert:
             try:
-                df.to_sql("player_table", db.get_connection(), if_exists="append", index=False)
-                print("[INS]: {}".format(x["summonerName"]))
-            except ValueError:
-                print("[DUP]: {}".format(x["summonerName"]))
+                db.execute_raw(insert_query, (
+                    player['summonerId'], player['summonerName'], player['leaguePoints'],
+                    player['rank'], player['wins'], player['losses'], player['veteran'],
+                    player['inactive'], player['freshBlood'], player['hotStreak'],
+                    player['tier'], player['request_region'], player['queue']
+                ))
+                print("[INS]: {}".format(player["summonerName"]))
+            except psycopg2.IntegrityError:
                 continue
-            except sqlite3.IntegrityError:
-                print("[DUP]: {}".format(x["summonerName"]))
-                continue
+
+        # for x in total_users_to_insert:
+        #     df = pd.DataFrame(x, index=[0])
+
+        #     try:
+        #         df.to_sql("player_table", db.get_connection(), if_exists="append", index=False, method="multi")
+        #         print("[INS]: {}".format(x["summonerName"]))
+        #     except ValueError:
+        #         print("[DUP]: {}".format(x["summonerName"]))
+        #         continue
+        #     except psycopg2.IntegrityError:
+        #         print("[DUP]: {}".format(x["summonerName"]))
+        #         continue
 
 
     def extract_matches(self, region, match_id, db, key):
@@ -446,7 +460,7 @@ class RiotAPI:
                 }
                 try:
                     db.execute("INSERT INTO matchups VALUES (?)", (to_insert_obj,))
-                except sqlite3.IntegrityError:
+                except psycopg2.IntegrityError:
                     print(
                         "{} Match details {} already inserted".format(
                             time.strftime("%Y-%m-%d %H:%M"), to_insert_obj.get("p_match_id")
@@ -517,7 +531,7 @@ class RiotAPI:
                     print(
                         "[{}][ADD] +{}".format(time.strftime("%Y-%m-%d %H:%M"), len(diff))
                     )
-                except sqlite3.IntegrityError as e:
+                except psycopg2.IntegrityError as e:
                     print(
                         "[{}][DUP]: {} {}".format(
                             time.strftime("%Y-%m-%d %H:%M"), current_summoner, e
@@ -582,7 +596,7 @@ class RiotAPI:
                 try:
                     db.execute("INSERT INTO match_detail VALUES (?)", (match_detail,))
                     db.execute("UPDATE match SET processed_5v5 = 1 WHERE key = ?", (x[0],))
-                except sqlite3.IntegrityError as e:
+                except psycopg2.IntegrityError as e:
                     print(
                         "[{}][DUP]: {} {}".format(
                             time.strftime("%Y-%m-%d %H:%M"), x[0], e

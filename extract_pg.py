@@ -1,29 +1,33 @@
 import os
-import random
-import sqlite3
 
-import pandas as pd
+import psycopg2
 from dotenv import load_dotenv
 
-from database_sqlite import Database
+from database_pg import Database
 from riot_api import RiotAPI
 
-conn = sqlite3.connect("lol_gpt_v3.db", timeout=5)
+conn = psycopg2.connect(
+    host=os.environ.get("SUPABASE_URL"),
+    port=os.environ.get("SUPABASE_PORT"),
+    database=os.environ.get("SUPABASE_DB"),
+    user=os.environ.get("SUPABASE_USER"),
+    password=os.environ.get("SUPABASE_PW")
+)
 
-query = "SELECT * FROM match_table"
-result_set = conn.execute(query)
-all_matches = result_set.fetchall()
-random.shuffle(all_matches)
+# cursor = conn.cursor()
+# query = "SELECT * FROM match_table"
+# cursor.execute(query)
+# result_set = cursor.fetchall()
+# random.shuffle(result_set)
 
-df = pd.DataFrame(all_matches, columns=["match_id"])
+# df = pd.DataFrame(result_set, columns=["match_id"])
 
-conn.close()
+# conn.close()
 
-currently_limited = 0
+# currently_limited = 0
 
-# Visualize dataframe
-print(df.tail(3))
-print("Dataframe length: {}".format(len(df)))
+# print(df.tail(3))
+# print("Dataframe length: {}".format(len(df)))
 
 load_dotenv()
 

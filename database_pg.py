@@ -4,12 +4,20 @@ import time
 import pandas as pd
 import psycopg2
 from rich import print
+from sqlalchemy import create_engine
 
 
 class Database:
 
     def __init__(self, database_path):
         self.database_path = database_path
+
+
+    def execute_raw(self, sql, params=None):
+        with self.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, params)
+                conn.commit()
 
 
     def execute(self, query, params=None):
@@ -29,9 +37,15 @@ class Database:
         )
 
 
+    def get_sqlalchemy_engine(self):
+        database_url = f"postgresql+psycopg2://{os.environ.get('SUPABASE_USER')}:" \
+                       f"{os.environ.get('SUPABASE_PW')}@{os.environ.get('SUPABASE_URL')}:" \
+                       f"{os.environ.get('SUPABASE_PORT')}/{os.environ.get('SUPABASE_DB')}"
+        engine = create_engine(database_url)
+        return engine
+
     def run_init_db(self):
         conn = self.get_connection()
-
         player_table_def = """
             CREATE TABLE IF NOT EXISTS player_table (
                 summonerId TEXT PRIMARY KEY,
@@ -285,6 +299,12 @@ class Database:
 
 
 class ProcessPerformance:
+
+
+    def __init__(self, db):
+        self.db = db
+
+
     def calculate_player_performance(self, participant_data, duration_m):
         deaths_per_min = participant_data["deaths"] / duration_m
         k_a_per_min = (participant_data["kills"] + participant_data["assists"]) / duration_m
@@ -298,10 +318,10 @@ class ProcessPerformance:
         return round((calculated_player_performance * 100), 2)
 
 
-    def insert_performance_data(self, final_object, conn):
+    def insert_performance_data(self, final_object):
         df = pd.DataFrame(final_object, index=[0])
         try:
-            df.to_sql("performance_table", conn, if_exists="append", index=False)
+            df.to_sql("performance_table", self.db.get_sqlalchemy_engine(), if_exists="append", index=False)
             print(
                 "[{}] PERF {}%".format(
                     final_object["championName"], final_object["calculated_player_performance"]
@@ -377,7 +397,7 @@ class ProcessPerformance:
 
             final_object = second_obj | new_object
 
-            self.insert_performance_data(final_object, conn)
+            self.insert_performance_data(final_object)
 
         return 1
 

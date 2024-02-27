@@ -229,6 +229,7 @@ class ProcessPerformance:
 
         return 1
 
+
 def extract_frame_data(frame, participant_id):
     participant_frame = frame.get("participantFrames").get(str(participant_id))
     if not participant_frame:
