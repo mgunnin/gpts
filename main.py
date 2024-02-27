@@ -1,7 +1,9 @@
 import os
 
-from fastapi import BackgroundTasks, FastAPI
+
+from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
 
 from database_pg import Database, ProcessPerformance
 from exceptions import MissingEnvironmentVariableError
@@ -14,7 +16,7 @@ if not ORIGINS:
 origins = ORIGINS.split(",")
 
 app = FastAPI()
-db = Database("lol_gpt_v3.db")
+db = Database.get_connection
 
 app.add_middleware(
     CORSMiddleware,
@@ -144,6 +146,32 @@ async def calculate_performance(match_id: str):
             return {"error": "Match not found"}
     except Exception as e:
         return {"error": f"Error calculating performance: {e}"}
+
+
+@app.get("/")
+def home():
+  return {"message": "Welcome to the Esports Playmaker"}
+
+
+@app.get("/logo.png")
+async def plugin_logo():
+  return FileResponse("logo.png", media_type="image/png")
+
+
+@app.get("/.well-known/ai-plugin.json")
+async def plugin_manifest():
+  with open("ai-plugin.json", "r") as f:
+    json_content = f.read()
+  return Response(content=json_content, media_type="application/json")
+
+
+@app.get("/openapi.yaml")
+async def openapi_spec(request: Request):
+  host = request.client.host if request.client else "localhost"
+  with open("openapi.yaml", "r") as f:
+    yaml_content = f.read()
+  yaml_content = yaml_content.replace("PLUGIN_HOSTNAME", f"https://{host}")
+  return Response(content=yaml_content, media_type="application/yaml")
 
 
 if __name__ == "__main__":
