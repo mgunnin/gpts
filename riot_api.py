@@ -103,7 +103,7 @@ class RiotAPI:
         """
         assert request_region in self.request_regions
 
-        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{}".format(
+        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/{}".format(
             request_region, puuid
         )
 
@@ -153,7 +153,7 @@ class RiotAPI:
 
     def get_total_champion_mastery_score(self, puuid, request_region):
         assert request_region in self.request_regions
-        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-summoner/{}".format(
+        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-puuid/{}".format(
             request_region, puuid
         )
 

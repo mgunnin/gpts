@@ -1,6 +1,5 @@
 import os
 
-
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
@@ -83,6 +82,16 @@ async def get_champion_mastery(puuid: str, region: str = "na1"):
         return champion_mastery
     except Exception as e:
         return {"error": f"Error retrieving champion mastery: {e}"}
+
+
+@app.get("/champion_mastery/scores/{puuid}")
+async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
+    try:
+        riot_api = RiotAPI(db)
+        total_champion_mastery_score = riot_api.get_total_champion_mastery_score(puuid, region)
+        return total_champion_mastery_score
+    except Exception as e:
+        return {"error": f"Error retrieving total champion mastery score: {e}"}
 
 
 @app.get("/match_list/{puuid}")

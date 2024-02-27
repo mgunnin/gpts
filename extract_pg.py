@@ -57,7 +57,8 @@ def data_mine(db, mode):
         api.match_download_detail(db)
 
 def main(mode):
-    db = Database("lol_gpt_v3.db")
+    #db = Database("lol_gpt_v3.db")
+    db = Database(conn)
     db.run_init_db()
     data_mine(db, mode)
 

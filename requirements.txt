@@ -1,27 +1,25 @@
-python_dateutil >= 2.5.3
-urllib3 >= 1.25.3, < 2.1.0
-pydantic >= 2
-typing-extensions >= 4.7.1
+aiosqlite
+cassiopeia
+fastapi
+httpx
+matplotlib
+openai
+pandas >= 1.4.0
 psycopg2
-requests_mock
+pydantic
+python-dotenv
+python_dateutil >= 2.5.3
 quart
 quart-cors
 requests
-cassiopeia
-pydantic
-fastapi
-httpx
-uvicorn
-openai
-pandas >= 1.4.0
+requests_mock
 riotwatcher >= 3.2.0
-cassiopeia
-tqdm >= 4.64.0
-python-dotenv
+scikit-learn
 setuptools
 sortedcontainers
-scikit-learn
-matplotlib
-aiosqlite
-ujson
 supabase
+tqdm >= 4.64.0
+typing-extensions >= 4.7.1
+ujson
+urllib3 >= 1.25.3, < 2.1.0
+uvicorn

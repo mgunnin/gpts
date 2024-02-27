@@ -2,12 +2,11 @@ import datetime
 import os
 import random
 import time
-import uvicorn
-
 
 import pandas as pd
 import psycopg2
 import requests
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,8 +49,8 @@ app.add_middleware(
 
 # Database class
 class Database:
-    def __init__(self, database_path):
-        self.database_path = database_path
+    def __init__(self):
+        self.engine = self.get_sqlalchemy_engine()
 
     def execute_raw(self, sql, params=None):
         with self.get_connection() as conn:
@@ -443,7 +442,7 @@ class RiotAPI:
     def get_champion_mastery(self, puuid, request_region):
         assert request_region in self.request_regions
 
-        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{}".format(
+        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/{}".format(
             request_region, puuid
         )
 
@@ -481,7 +480,7 @@ class RiotAPI:
                     champion_name,
                     i.get("championLevel"),
                     i.get("championPoints"),
-                    datetime.datetime.fromtimestamp(i.get("lastPlayTime") / 1000).strftime(
+                    datetime.datetime.fromtimestamp(i("lastPlayTime") / 1000).strftime(
                         "%c"
                     ),
                     i.get("championPointsUntilNextLevel"),
@@ -492,7 +491,7 @@ class RiotAPI:
 
     def get_total_champion_mastery_score(self, puuid, request_region):
         assert request_region in self.request_regions
-        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-summoner/{}".format(
+        request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-puuid/{}".format(
             request_region, puuid
         )
 
@@ -961,12 +960,7 @@ class ProcessPerformance:
         gold_per_min = participant_data["goldEarned"] / duration_m
 
         calculated_player_performance = (
-            0.336
-            - (1.437 * deaths_per_min)
-            + (0.000117 * gold_per_min)
-            + (0.443 * k_a_per_min)
-            + (0.264 * level_per_min)
-            + (0.000013 * total_damage_per_min)
+            0.336 - (1.437 * deaths_per_min) + (0.000117 * gold_per_min) + (0.443 * k_a_per_min) + (0.264 * level_per_min) + (0.000013 * total_damage_per_min)
         )
         return round((calculated_player_performance * 100), 2)
 
@@ -1136,8 +1130,7 @@ def build_final_object(json_object):
                 frame_data["identifier"] = f"{match_id}_{participant_id}"
                 frame_data["winner"] = (
                     1
-                    if participant_id in (1, 2, 3, 4, 5) and winner == 100
-                    or participant_id not in (1, 2, 3, 4, 5) and winner == 200
+                    if participant_id in (1, 2, 3, 4, 5) and winner == 100 or participant_id not in (1, 2, 3, 4, 5) and winner == 200
                     else 0
                 )
                 all_frames.append(frame_data)
@@ -1171,8 +1164,7 @@ def build_final_object_liveclient(json_object):
                 frame_data["identifier"] = f"{match_id}_{participant_id}"
                 frame_data["winner"] = (
                     1
-                    if participant_id in (1, 2, 3, 4, 5) and winner == 100
-                    or participant_id not in (1, 2, 3, 4, 5) and winner == 200
+                    if participant_id in (1, 2, 3, 4, 5) and winner == 100 or participant_id not in (1, 2, 3, 4, 5) and winner == 200
                     else 0
                 )
                 # Add any live client specific data extraction here
@@ -1251,11 +1243,11 @@ async def calculate_performance(match_id: str):
             performance_data = performance_calculator.process_player_performance(
                 match_detail[0], db
             )
+            cursor.close()
             return performance_data
-        else:
-            return {"error": "Match not found"}
-    finally:
-        cursor.close()
+    except Exception as e:
+        return {"error": f"Error retrieving match detail: {e}"}
+
 
 
 @app.get("/")
