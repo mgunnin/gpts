@@ -239,19 +239,26 @@ class Database:
         conn.close()
 
 
-
     def change_column_value_by_key(self, table_name, column_name, column_value, key):
+        """
+        Updates the value of a specific column in a table based on a given key.
+
+        Args:
+            table_name (str): The name of the table.
+            column_name (str): The name of the column to be updated.
+            column_value: The new value to be set for the column.
+            key: The key used to identify the row to be updated.
+
+        Returns:
+            None
+        """
         connection = self.get_connection()
         cursor = connection.cursor()
         update_statement = f"UPDATE {table_name} SET {column_name} = %s WHERE key_column = %s"
         cursor.execute(update_statement, (column_value, key))
         connection.commit()
         print(
-            "{} [DBG] UPDATE BIT {}: {}".format(
-                time.strftime("%Y-%m-%d %H:%M"),
-                column_name,
-                column_value,
-            )
+            "{} [DBG] UPDATE BIT {}: {}".format(time.strftime("%Y-%m-%d %H:%M"),column_name,column_value,)
         )
         connection.close()
 
@@ -332,8 +339,6 @@ class Database:
 
 
 class ProcessPerformance:
-
-
     def __init__(self, db):
         self.db = db
 
@@ -435,6 +440,39 @@ class ProcessPerformance:
         return 1
 
 def extract_frame_data(frame, participant_id):
+    """
+    Extracts relevant data from a frame for a specific participant.
+
+    Args:
+        frame (dict): The frame containing participant data.
+        participant_id (int): The ID of the participant.
+
+    Returns:
+        dict: A dictionary containing the extracted data for the participant.
+              The dictionary includes the following keys:
+              - timestamp
+              - participantId
+              - level
+              - xp
+              - totalGold
+              - minionsKilled
+              - jungleMinionsKilled
+              - timeEnemySpentControlled
+              - abilityPower (optional)
+              - armor (optional)
+              - attackDamage (optional)
+              - attackSpeed (optional)
+              - health (optional)
+              - healthMax (optional)
+              - healthRegen (optional)
+              - magicResist (optional)
+              - movementSpeed (optional)
+              - power (optional)
+              - powerMax (optional)
+              - powerRegen (optional)
+              - totalDamageDealt (optional)
+              - totalDamageTaken (optional)
+    """
     participant_frame = frame.get("participantFrames").get(str(participant_id))
     if not participant_frame:
         return None

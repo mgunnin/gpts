@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import requests
 
-current_version = "14.2.1"  # change this depending on the current game version, or the game version you want to process.
+current_version = "14.2.1"
 request_url = (
     "https://ddragon.leagueoflegends.com/cdn/{}/data/en_US/champion.json".format(
         current_version
@@ -32,9 +32,7 @@ ids, keys, titles = (list(), list(), list())
 
 for key, value in champions.items():
     # print('{}, {}: {}'.format(value.get('id'), value.get('title'), value.get('key')))
-    ids.append(value.get("id")), keys.append(value.get("key")), titles.append(
-        value.get("title")
-    )
+    ids.append(value.get("id")), keys.append(value.get("key")), titles.append(value.get("title"))
     print("{}\t{}".format(value.get("id"), value.get("key")))
     print("Stats: {}".format(value.get("stats")))
 
@@ -52,7 +50,6 @@ print(champion_df)
 
 final_csv_path = "../../data/champion_ids.csv"
 
-# If the file exists, we write data. Otherwise, we create the file, then write the data.
 if os.path.exists(final_csv_path):
     champion_df.to_csv(final_csv_path)
 else:

@@ -1,6 +1,6 @@
 import os
 
-from fastapi import BackgroundTasks, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
@@ -26,24 +26,6 @@ app.add_middleware(
 )
 
 
-# Trigger the background task on startup
-async def populate_database():
-    """
-    Background task that populates the database with top players' information.
-    """
-    riot_api = RiotAPI(db)
-    for region in riot_api.request_regions:
-        for queue in ["RANKED_SOLO_5x5"]:
-            riot_api.get_top_players(region, queue, db)
-
-async def lifespan():
-    """
-    Lifespan event handler that adds the background task to populate the database.
-    """
-    background_tasks = BackgroundTasks()
-    background_tasks.add_task(populate_database)
-
-
 # API endpoints
 @app.get("/summoner/{summoner_name}")
 async def get_summoner_information(summoner_name: str, region: str = "na1"):
@@ -67,14 +49,14 @@ async def get_summoner_information(summoner_name: str, region: str = "na1"):
 @app.get("/champion_mastery/{puuid}")
 async def get_champion_mastery(puuid: str, region: str = "na1"):
     """
-    Retrieves champion mastery information based on the player UUID and region.
+    Retrieves the champion mastery for a given player.
 
     Args:
-        puuid (str): The player UUID.
-        region (str, optional): The region of the player. Defaults to "na1".
+        puuid (str): The unique identifier for the player.
+        region (str, optional): The region where the player is located. Defaults to "na1".
 
     Returns:
-        dict: The champion mastery information.
+        dict: A dictionary containing the champion mastery information, or an error message if an exception occurs.
     """
     try:
         riot_api = RiotAPI(db)
@@ -86,6 +68,16 @@ async def get_champion_mastery(puuid: str, region: str = "na1"):
 
 @app.get("/champion_mastery/scores/{puuid}")
 async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
+    """
+    Retrieves the total champion mastery score for a given player.
+
+    Args:
+        puuid (str): The player's unique identifier.
+        region (str, optional): The region where the player is located. Defaults to "na1".
+
+    Returns:
+        dict: A dictionary containing the total champion mastery score, or an error message if an exception occurs.
+    """
     try:
         riot_api = RiotAPI(db)
         total_champion_mastery_score = riot_api.get_total_champion_mastery_score(puuid, region)
@@ -96,6 +88,16 @@ async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
 
 @app.get("/summoner/leagues/{summonerId}")
 async def get_summoner_leagues(summonerId: str, region: str = "na1"):
+    """
+    Retrieves a list of league information for the given summoner ID.
+
+    Args:
+        summonerId (str): The summoner ID.
+        region (str, optional): The region of the summoner. Defaults to "na1".
+
+    Returns:
+        dict: A dictionary containing the league information for the given summoner ID.
+    """
     try:
         riot_api = RiotAPI(db)
         summoner_leagues = riot_api.get_summoner_leagues(summonerId, region)
@@ -169,11 +171,11 @@ async def calculate_performance(match_id: str):
 
 
 @app.get("/")
-def home():
+async def home():
   return {"message": "Welcome to the Esports Playmaker"}
 
 
-@app.get("/logo.png")
+@app.get("/public/logo.png")
 async def plugin_logo():
   return FileResponse("logo.png", media_type="image/png")
 

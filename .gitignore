@@ -1,10 +1,10 @@
 /.env
-/tools/gpt-crawler
-/reference
-/routes/__pycache__
-/lol_gpt_v2.db
-/lol_gpt_v3.db
+/.pytest_cache
+/__pycache__
 /config.yaml
-/item_recommender/.env
 /db.load
 /gpt_lol.code-workspace
+/lol_gpt_v2.db
+/lol_gpt_v3.db
+/reference
+/tools/gpt-crawler
