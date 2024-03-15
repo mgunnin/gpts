@@ -12,13 +12,11 @@ class Database:
     def __init__(self, database_path):
         self.database_path = database_path
 
-
     def execute_raw(self, sql, params=None):
         with self.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(sql, params)
                 conn.commit()
-
 
     def execute(self, query, params=None):
         with self.get_connection() as connection:
@@ -26,21 +24,21 @@ class Database:
             cursor.execute(query, params or ())
             return cursor
 
-
     def get_connection(self):
         return psycopg2.connect(
             host=os.environ.get("SUPABASE_URL"),
             port=os.environ.get("SUPABASE_PORT"),
             database=os.environ.get("SUPABASE_DB"),
             user=os.environ.get("SUPABASE_USER"),
-            password=os.environ.get("SUPABASE_PW")
+            password=os.environ.get("SUPABASE_PW"),
         )
 
-
     def get_sqlalchemy_engine(self):
-        database_url = f"postgresql+psycopg2://{os.environ.get('SUPABASE_USER')}:" \
-                       f"{os.environ.get('SUPABASE_PW')}@{os.environ.get('SUPABASE_URL')}:" \
-                       f"{os.environ.get('SUPABASE_PORT')}/{os.environ.get('SUPABASE_DB')}"
+        database_url = (
+            f"postgresql+psycopg2://{os.environ.get('SUPABASE_USER')}:"
+            f"{os.environ.get('SUPABASE_PW')}@{os.environ.get('SUPABASE_URL')}:"
+            f"{os.environ.get('SUPABASE_PORT')}/{os.environ.get('SUPABASE_DB')}"
+        )
         engine = create_engine(database_url)
         return engine
 
@@ -238,7 +236,6 @@ class Database:
         conn.commit()
         conn.close()
 
-
     def change_column_value_by_key(self, table_name, column_name, column_value, key):
         """
         Updates the value of a specific column in a table based on a given key.
@@ -254,14 +251,19 @@ class Database:
         """
         connection = self.get_connection()
         cursor = connection.cursor()
-        update_statement = f"UPDATE {table_name} SET {column_name} = %s WHERE key_column = %s"
+        update_statement = (
+            f"UPDATE {table_name} SET {column_name} = %s WHERE key_column = %s"
+        )
         cursor.execute(update_statement, (column_value, key))
         connection.commit()
         print(
-            "{} [DBG] UPDATE BIT {}: {}".format(time.strftime("%Y-%m-%d %H:%M"),column_name,column_value,)
+            "{} [DBG] UPDATE BIT {}: {}".format(
+                time.strftime("%Y-%m-%d %H:%M"),
+                column_name,
+                column_value,
+            )
         )
         connection.close()
-
 
     def process_predictor(self):
         connection = self.get_connection()
@@ -302,7 +304,6 @@ class Database:
         connection.commit()
         connection.close()
 
-
     def process_predictor_liveclient(self):
         connection = self.get_connection()
         cursor = connection.cursor()
@@ -342,32 +343,42 @@ class ProcessPerformance:
     def __init__(self, db):
         self.db = db
 
-
     def calculate_player_performance(self, participant_data, duration_m):
         deaths_per_min = participant_data["deaths"] / duration_m
-        k_a_per_min = (participant_data["kills"] + participant_data["assists"]) / duration_m
+        k_a_per_min = (
+            participant_data["kills"] + participant_data["assists"]
+        ) / duration_m
         level_per_min = participant_data["champLevel"] / duration_m
         total_damage_per_min = participant_data["totalDamageDealt"] / duration_m
         gold_per_min = participant_data["goldEarned"] / duration_m
 
         calculated_player_performance = (
-            0.336 - (1.437 * deaths_per_min) + (0.000117 * gold_per_min) + (0.443 * k_a_per_min) + (0.264 * level_per_min) + (0.000013 * total_damage_per_min)
+            0.336
+            - (1.437 * deaths_per_min)
+            + (0.000117 * gold_per_min)
+            + (0.443 * k_a_per_min)
+            + (0.264 * level_per_min)
+            + (0.000013 * total_damage_per_min)
         )
         return round((calculated_player_performance * 100), 2)
-
 
     def insert_performance_data(self, final_object):
         df = pd.DataFrame(final_object, index=[0])
         try:
-            df.to_sql("performance_table", self.db.get_sqlalchemy_engine(), if_exists="append", index=False)
+            df.to_sql(
+                "performance_table",
+                self.db.get_sqlalchemy_engine(),
+                if_exists="append",
+                index=False,
+            )
             print(
                 "[{}] PERF {}%".format(
-                    final_object["championName"], final_object["calculated_player_performance"]
+                    final_object["championName"],
+                    final_object["calculated_player_performance"],
                 )
             )
         except ValueError:
             print("[DUPLICATE FOUND] {}".format(final_object["match_identifier"]))
-
 
     def process_player_performance(self, obj, conn):
         match_identifier = str()
@@ -389,7 +400,9 @@ class ProcessPerformance:
         duration_m = obj["info"]["gameDuration"] / 60
 
         for participant in obj["info"]["participants"]:
-            calculated_performance = self.calculate_player_performance(participant, duration_m)
+            calculated_performance = self.calculate_player_performance(
+                participant, duration_m
+            )
 
             new_object = {
                 "match_identifier": match_identifier,
@@ -438,6 +451,7 @@ class ProcessPerformance:
             self.insert_performance_data(final_object)
 
         return 1
+
 
 def extract_frame_data(frame, participant_id):
     """
@@ -520,51 +534,74 @@ def extract_frame_data(frame, participant_id):
 
 
 def build_final_object(json_object):
-  all_frames = []
+    all_frames = []
 
-  try:
-      match_id = json_object.get("metadata").get("matchId")
-      winner = json_object.get("info").get("frames")[-1].get("events")[-1].get("winningTeam")
-  except AttributeError:
-      print(
-          "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
-              time.strftime("%Y-%m-%d %H:%M"), json_object
-          )
-      )
-      return None
+    try:
+        match_id = json_object.get("metadata").get("matchId")
+        winner = (
+            json_object.get("info")
+            .get("frames")[-1]
+            .get("events")[-1]
+            .get("winningTeam")
+        )
+    except AttributeError:
+        print(
+            "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
+                time.strftime("%Y-%m-%d %H:%M"), json_object
+            )
+        )
+        return None
 
-  for frame in json_object.get("info").get("frames"):
-      for participant_id in range(1, 11):
-          frame_data = extract_frame_data(frame, participant_id)
-          if frame_data:
-              frame_data["identifier"] = f"{match_id}_{participant_id}"
-              frame_data["winner"] = 1 if participant_id in (1, 2, 3, 4, 5) and winner == 100 or participant_id not in (1, 2, 3, 4, 5) and winner == 200 else 0
-              all_frames.append(frame_data)
+    for frame in json_object.get("info").get("frames"):
+        for participant_id in range(1, 11):
+            frame_data = extract_frame_data(frame, participant_id)
+            if frame_data:
+                frame_data["identifier"] = f"{match_id}_{participant_id}"
+                frame_data["winner"] = (
+                    1
+                    if participant_id in (1, 2, 3, 4, 5)
+                    and winner == 100
+                    or participant_id not in (1, 2, 3, 4, 5)
+                    and winner == 200
+                    else 0
+                )
+                all_frames.append(frame_data)
 
-  return all_frames
+    return all_frames
 
 
 def build_final_object_liveclient(json_object):
-  all_frames = []
+    all_frames = []
 
-  try:
-      match_id = json_object.get("metadata").get("matchId")
-      winner = json_object.get("info").get("frames")[-1].get("events")[-1].get("winningTeam")
-  except AttributeError:
-      print(
-          "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
-              time.strftime("%Y-%m-%d %H:%M"), json_object
-          )
-      )
-      return None
+    try:
+        match_id = json_object.get("metadata").get("matchId")
+        winner = (
+            json_object.get("info")
+            .get("frames")[-1]
+            .get("events")[-1]
+            .get("winningTeam")
+        )
+    except AttributeError:
+        print(
+            "{} [DBG] ERR MATCH_ID RETRIEVAL: {}".format(
+                time.strftime("%Y-%m-%d %H:%M"), json_object
+            )
+        )
+        return None
 
-  for frame in json_object.get("info").get("frames"):
-      for participant_id in range(1, 11):
-          frame_data = extract_frame_data(frame, participant_id)
-          if frame_data:
-              frame_data["identifier"] = f"{match_id}_{participant_id}"
-              frame_data["winner"] = 1 if participant_id in (1, 2, 3, 4, 5) and winner == 100 or participant_id not in (1, 2, 3, 4, 5) and winner == 200 else 0
-# Add any live client specific data extraction here
-              all_frames.append(frame_data)
+    for frame in json_object.get("info").get("frames"):
+        for participant_id in range(1, 11):
+            frame_data = extract_frame_data(frame, participant_id)
+            if frame_data:
+                frame_data["identifier"] = f"{match_id}_{participant_id}"
+                frame_data["winner"] = (
+                    1
+                    if participant_id in (1, 2, 3, 4, 5)
+                    and winner == 100
+                    or participant_id not in (1, 2, 3, 4, 5)
+                    and winner == 200
+                    else 0
+                )
+                all_frames.append(frame_data)
 
-  return all_frames
+    return all_frames

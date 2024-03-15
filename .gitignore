@@ -1,6 +1,5 @@
 /.env
 /.pytest_cache
-/__pycache__
 /config.yaml
 /db.load
 /gpt_lol.code-workspace
@@ -8,3 +7,4 @@
 /lol_gpt_v3.db
 /reference
 /tools/gpt-crawler
+__pycache__

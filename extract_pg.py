@@ -56,10 +56,27 @@ def data_mine(db, mode):
         api.match_download_standard(db)
         api.match_download_detail(db)
 
-def main(mode):
-    #db = Database("lol_gpt_v3.db")
+def main(mode: str) -> None:
+    """
+    Initializes a Database object, runs an initialization script on the database,
+    and then calls the data_mine function with the specified mode.
+
+    Args:
+        mode (str): The mode in which the data_mine function should be called.
+                    It can be one of the following values: "player_list", "match_list",
+                    "match_download_standard", or "match_download_detail".
+
+    Returns:
+        None
+    """
+
+    # Initialize a Database object
     db = Database(conn)
+
+    # Run the initialization script on the database
     db.run_init_db()
+
+    # Call the data_mine function with the specified mode
     data_mine(db, mode)
 
 

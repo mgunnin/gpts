@@ -5,8 +5,6 @@ from riot_api import RiotAPI
 
 db = Database.get_connection
 
-
-
 # Trigger the background task on startup
 async def populate_database():
     """

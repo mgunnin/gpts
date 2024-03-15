@@ -1,3 +1,4 @@
+import logging
 import os
 
 from fastapi import FastAPI, Request
@@ -8,15 +9,27 @@ from database_pg import Database, ProcessPerformance
 from exceptions import MissingEnvironmentVariableError
 from riot_api import RiotAPI
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
 ORIGINS = os.getenv("ORIGINS")
 if not ORIGINS:
     raise MissingEnvironmentVariableError("ORIGINS")
 
 origins = ORIGINS.split(",")
 
-app = FastAPI()
-db = Database.get_connection
-
+app = FastAPI(
+    title="Esports Playmaker",
+    description="A FastAPI application for the Esports Playmaker plugin.",
+    version="0.1.0",
+    servers=[
+        {"url": "http://127.0.0.1:8000/"},
+        {"url": "https://esports-playmaker.herokuapp.com/"},
+    ],
+)
+db = Database(os.getenv("DATABASE_URL")).get_connection()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -45,6 +58,7 @@ async def get_summoner_information(summoner_name: str, region: str = "na1"):
         return summoner_info
     except Exception as e:
         return {"error": f"Error retrieving summoner information: {e}"}
+
 
 @app.get("/champion_mastery/{puuid}")
 async def get_champion_mastery(puuid: str, region: str = "na1"):
@@ -80,7 +94,9 @@ async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
     """
     try:
         riot_api = RiotAPI(db)
-        total_champion_mastery_score = riot_api.get_total_champion_mastery_score(puuid, region)
+        total_champion_mastery_score = riot_api.get_total_champion_mastery_score(
+            puuid, region
+        )
         return total_champion_mastery_score
     except Exception as e:
         return {"error": f"Error retrieving total champion mastery score: {e}"}
@@ -106,63 +122,72 @@ async def get_summoner_leagues(summonerId: str, region: str = "na1"):
         return {"error": f"Error retrieving summoner leagues: {e}"}
 
 
-
 @app.get("/match_list/{puuid}")
-async def get_match_list(puuid: str, num_matches: int = 10, queue_type: str = "ranked", region: str = "americas"):
+async def get_match_list(
+    puuid: str,
+    num_matches: int = 10,
+    queue_type: str = "ranked",
+    region: str = "americas",
+):
     """
     Retrieves a list of match IDs based on the player UUID, number of matches, queue type, and region.
-
-    Args:
-        puuid (str): The player UUID.
-        num_matches (int, optional): The number of matches to retrieve. Defaults to 10.
-        queue_type (str, optional): The type of queue. Defaults to "ranked".
-        region (str, optional): The region of the player. Defaults to "americas".
-
-    Returns:
-        dict: The list of match IDs.
     """
+    logging.info(
+        f"Fetching match list for PUUID: {puuid}, Num Matches: {num_matches}, Queue Type: {queue_type}, Region: {region}"
+    )
     try:
         riot_api = RiotAPI(db)
         match_list = riot_api.get_match_ids(puuid, num_matches, queue_type, region)
+        if not match_list:
+            logging.warning("Received empty match list.")
         return match_list
     except Exception as e:
+        logging.error(f"Error retrieving match list: {e}")
         return {"error": f"Error retrieving match list: {e}"}
 
 
 @app.get("/match_detail/{match_id}")
-async def get_match_detail(match_id: str):
+async def get_match_detail(match_id: str, db):
     """
-    Retrieves detailed match information from the database based on the match ID.
-
-    Args:
-        match_id (str): The match ID.
-
-    Returns:
-        dict: The detailed match information.
+    Retrieves the match detail for a given match ID.
     """
     try:
-        match_detail = db.execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,)).fetchone()
-        return match_detail
+        match_detail = (
+            db.cursor()
+            .execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,))
+            .fetchone()
+        )
+        if match_detail is not None:
+            return match_detail
+        else:
+            return {"error": "Match not found"}
     except Exception as e:
         return {"error": f"Error retrieving match detail: {e}"}
 
 
 @app.post("/performance")
-async def calculate_performance(match_id: str):
+async def calculate_performance(match_id: str, db):
     """
     Calculates player performance based on match details.
 
     Args:
         match_id (str): The match ID.
+        db: The database connection.
 
     Returns:
         dict: The calculated performance data.
     """
     try:
-        match_detail = db.execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,)).fetchone()
+        match_detail = (
+            db.cursor()
+            .execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,))
+            .fetchone()
+        )
         if match_detail:
             performance_calculator = ProcessPerformance(db)
-            performance_data = performance_calculator.process_player_performance(match_detail[0], db.get_connection())
+            performance_data = performance_calculator.process_player_performance(
+                match_detail[0], db
+            )
             return performance_data
         else:
             return {"error": "Match not found"}
@@ -172,30 +197,31 @@ async def calculate_performance(match_id: str):
 
 @app.get("/")
 async def home():
-  return {"message": "Welcome to the Esports Playmaker"}
+    return {"message": "Welcome to the Esports Playmaker"}
 
 
 @app.get("/public/logo.png")
 async def plugin_logo():
-  return FileResponse("logo.png", media_type="image/png")
+    return FileResponse("logo.png", media_type="image/png")
 
 
 @app.get("/.well-known/ai-plugin.json")
 async def plugin_manifest():
-  with open("ai-plugin.json", "r") as f:
-    json_content = f.read()
-  return Response(content=json_content, media_type="application/json")
+    with open("ai-plugin.json", "r") as f:
+        json_content = f.read()
+    return Response(content=json_content, media_type="application/json")
 
 
 @app.get("/openapi.yaml")
 async def openapi_spec(request: Request):
-  host = request.client.host if request.client else "localhost"
-  with open("openapi.yaml", "r") as f:
-    yaml_content = f.read()
-  yaml_content = yaml_content.replace("PLUGIN_HOSTNAME", f"https://{host}")
-  return Response(content=yaml_content, media_type="application/yaml")
+    host = request.client.host if request.client else "localhost"
+    with open("openapi.yaml", "r") as f:
+        yaml_content = f.read()
+    yaml_content = yaml_content.replace("PLUGIN_HOSTNAME", f"https://{host}")
+    return Response(content=yaml_content, media_type="application/yaml")
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

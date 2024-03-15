@@ -13,10 +13,12 @@ quart
 quart-cors
 requests
 requests_mock
+rich
 riotwatcher >= 3.2.0
 scikit-learn
 setuptools
 sortedcontainers
+sqlalchemy
 supabase
 tqdm >= 4.64.0
 typing-extensions >= 4.7.1
