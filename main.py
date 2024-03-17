@@ -19,6 +19,7 @@ app = FastAPI(
     version="0.1.0",
     servers=[
         {"url": "http://127.0.0.1:8000/"},
+        {"url": "https://gpts-MatthewGunnin.replit.app"},
     ],
 )
 db = Database(os.getenv("DATABASE_URL")).get_connection()
