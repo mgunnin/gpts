@@ -6,19 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
 from database_pg import Database, ProcessPerformance
-from exceptions import MissingEnvironmentVariableError
 from riot_api import RiotAPI
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
-ORIGINS = os.getenv("ORIGINS")
-if not ORIGINS:
-    raise MissingEnvironmentVariableError("ORIGINS")
-
-origins = ORIGINS.split(",")
 
 app = FastAPI(
     title="Esports Playmaker",
@@ -32,7 +25,11 @@ app = FastAPI(
 db = Database(os.getenv("DATABASE_URL")).get_connection()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        "http://localhost:8000",
+        "https://lacra-gpt-lol.replit.app",
+        "https://chat.openai.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
