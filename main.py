@@ -1,5 +1,6 @@
 import logging
 import os
+import uvicorn
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,18 +25,16 @@ app = FastAPI(
         },
     ],
 )
-db = Database(os.getenv("DATABASE_URL")).get_connection()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8000",
-        "https://lacralabs.replit.app",
-        "https://chat.openai.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+db = Database(os.getenv("DATABASE_URL")).get_connection()
 
 
 # API endpoints
@@ -198,6 +197,11 @@ async def plugin_logo():
   return FileResponse("logo.png", media_type="image/png")
 
 
+@app.get("/public/favicon.ico")
+async def plugin_favicon():
+  return FileResponse("favicon.ico", media_type="image/x-icon")
+
+
 @app.get("/.well-known/ai-plugin.json")
 async def plugin_manifest():
   with open("ai-plugin.json", "r") as f:
@@ -205,7 +209,7 @@ async def plugin_manifest():
   return Response(content=json_content, media_type="application/json")
 
 
-@app.get("/openapi.yaml")
+@app.get("/public/lol-openapi.yaml")
 async def openapi_spec(request: Request):
   host = request.client.host if request.client else "localhost"
   with open("openapi.yaml", "r") as f:
@@ -215,6 +219,4 @@ async def openapi_spec(request: Request):
 
 
 if __name__ == "__main__":
-  import uvicorn
-  port = int(os.getenv("PORT", "8000"))
-  uvicorn.run(app, host="0.0.0.0", port=port)
+  uvicorn.run(app, host="0.0.0.0", port=8080)

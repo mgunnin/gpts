@@ -1,28 +1,9 @@
-aiosqlite
-cassiopeia
 fastapi
-httpx
-matplotlib
 openai
-pandas >= 1.4.0
-psycopg2
-pydantic
-python-dotenv
-python_dateutil >= 2.5.3
-quart
-quart-cors
-requests
-requests_mock
-rich
-riotwatcher >= 3.2.0
-scikit-learn
-setuptools
-sortedcontainers
-sqlalchemy
-supabase
-tqdm >= 4.64.0
-typing-extensions >= 4.7.1
-ujson
-urllib3 >= 1.25.3, < 2.1.0
-uvicorn
+pandas
 psycopg2-binary
+python-dotenv
+requests
+rich
+sqlalchemy
+uvicorn
