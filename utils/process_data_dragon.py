@@ -24,7 +24,6 @@ print(len(data))
 print("Version: {}".format(data.get("version")))
 champions = data.get("data")
 print("Total champions: {}".format(len(champions)))
-# print(champions.get('Aatrox'))
 
 
 ids, keys, titles = (list(), list(), list())
@@ -32,7 +31,9 @@ ids, keys, titles = (list(), list(), list())
 
 for key, value in champions.items():
     # print('{}, {}: {}'.format(value.get('id'), value.get('title'), value.get('key')))
-    ids.append(value.get("id")), keys.append(value.get("key")), titles.append(value.get("title"))
+    ids.append(value.get("id")), keys.append(value.get("key")), titles.append(
+        value.get("title")
+    )
     print("{}\t{}".format(value.get("id"), value.get("key")))
     print("Stats: {}".format(value.get("stats")))
 
@@ -44,7 +45,7 @@ champion_df = {
 champion_df = pd.DataFrame(champion_df)
 
 champion_df.index.name = "index"
-
+champion_df.set_index("champion_id", inplace=True)
 
 print(champion_df)
 

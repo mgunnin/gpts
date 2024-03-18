@@ -37,33 +37,43 @@ This application aims to be a comprehensive tool for League of Legends players a
 We are developing an application that leverages AI to analyze League of Legends match data and provide insights and predictions to players. The application should:
 
 1. Data Collection and Management:
-Interact with the Riot Games API to collect match data, including timelines and detailed participant statistics.
-Store the collected data efficiently in a Supabase database, handling potential duplicates and ensuring data integrity.
-Implement robust error handling and logging mechanisms to track API requests and database operations.
+   - Interact with the Riot Games API to collect match data, including timelines and detailed participant statistics.
+   - Store the collected data efficiently in a Supabase database, handling potential duplicates and ensuring data integrity.
+   - Implement robust error handling and logging mechanisms to track API requests and database operations.
 2. Data Analysis and Feature Engineering:
-Calculate various player performance metrics, such as kills per minute, deaths per minute, gold per minute, and a composite performance score.
-Extract meaningful features from the match data, including champion picks, team compositions, objective control, and individual player contributions.
-Employ dimensionality reduction techniques if necessary to handle high-dimensional data.
+   - Calculate various player performance metrics, such as kills per minute, deaths per minute, gold per minute, and a composite performance score.
+   - Extract meaningful features from the match data, including champion picks, team compositions, objective control, and individual player contributions.
+   - Employ dimensionality reduction techniques if necessary to handle high-dimensional data.
 3. Predictive Modeling:
-Train machine learning models on the processed data to predict match outcomes and individual player performance.
-Experiment with different model architectures, such as decision trees, support vector machines, or neural networks, to find the best performing model.
-Evaluate model performance using appropriate metrics like accuracy, precision, recall, and F1-score.
+   - Train machine learning models on the processed data to predict match outcomes and individual player performance.
+   - Experiment with different model architectures, such as decision trees, support vector machines, or neural networks, to find the best performing model.
+   - Evaluate model performance using appropriate metrics like accuracy, precision, recall, and F1-score.
 4. User Interface and Visualization:
-Develop a user-friendly interface that allows players to:
-Search for summoners and view their match history.
-Analyze individual match details and player performance metrics.
-Get predictions for upcoming matches based on team compositions and player statistics.
-Create visualizations to display match statistics, player performance trends, and model predictions in an intuitive and engaging way.
-Additional Features and Improvements:
-Live Match Tracking: Integrate functionality to track live matches and update the database and predictions in real-time.
-Personalized Recommendations: Provide personalized recommendations to players based on their playstyle, champion pool, and past performance.
-Team Analysis: Offer insights into team synergy, strengths, and weaknesses based on match data and player statistics.
-Advanced Statistics: Calculate and display advanced statistics, such as damage dealt/taken per minute, crowd control duration, and objective bounties.
-Integration with Other Platforms: Explore integration with streaming platforms or social media to share insights and predictions with a wider audience.
-AI Programming and Engineering Agent's Role:
+   - Develop a user-friendly interface that allows players to:
+   - Search for summoners and view their match history.
+   - Analyze individual match details and player performance metrics.
+   - Get predictions for upcoming matches based on team compositions and player statistics.
+   - Create visualizations to display match statistics, player performance trends, and model predictions in an intuitive and engaging way.
+
+#### Additional Features and Improvements
+
+1. Live Match Tracking:
+   Integrate functionality to track live matches and update the database and predictions in real-time.
+2. Personalized Recommendations:
+   Provide personalized recommendations to players based on their playstyle, champion pool, and past performance.
+3. Team Analysis:
+   Offer insights into team synergy, strengths, and weaknesses based on match data and player statistics.
+4. Advanced Statistics:
+   Calculate and display advanced statistics, such as damage dealt/taken per minute, crowd control duration, and objective bounties.
+5. Integration with Other Platforms:
+   Explore integration with streaming platforms or social media to share insights and predictions with a wider audience.
+
+#### AI Programming and Engineering Agent's Role
+
 We expect the AI Programming and Engineering Agent to:
-Generate Python code for the application, including data collection, processing, modeling, and user interface components.
-Optimize the code for performance and efficiency, considering factors like rate limiting, parallel processing, and database optimization.
-Suggest and implement appropriate machine learning models and feature engineering techniques.
-Assist in designing and developing the user interface and visualizations.
-We believe that this application, with the help of the AI Programming and Engineering Agent, can provide valuable insights and predictions to League of Legends players, helping them improve their gameplay and decision-making.
+
+- Generate Python code for the application, including data collection, processing, modeling, and user interface components.
+- Optimize the code for performance and efficiency, considering factors like rate limiting, parallel processing, and database optimization.
+- Suggest and implement appropriate machine learning models and feature engineering techniques.
+- Assist in designing and developing the user interface and visualizations.
+- We believe that this application, with the help of the AI Programming and Engineering Agent, can provide valuable insights and predictions to League of Legends players, helping them improve their gameplay and decision-making.
