@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://lacra-gpt-lol.replit.app"
+      "url": "https://lacralabs.replit.app"
     },
     {
       "url": "https://{platform}.api.riotgames.com",
