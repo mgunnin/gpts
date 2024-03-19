@@ -1,11 +1,10 @@
 openapi: 3.1.0
 info:
-  version: '0.1.0'
-  title: 'League of Legends GPT'
+  version: "0.1.0"
+  title: "League of Legends GPT"
   description: "League of Legends GPT"
 servers:
-  -
-    url: 'https://{platform}.api.riotgames.com'
+  - url: "https://{platform}.api.riotgames.com"
     variables:
       platform:
         enum:
@@ -39,49 +38,48 @@ servers:
           - na
         default: americas
 paths:
-  '/riot/account/v1/accounts/by-puuid/{puuid}':
+  "/riot/account/v1/accounts/by-puuid/{puuid}":
     get:
       tags:
         - account-v1
-      summary: 'Get account by puuid'
+      summary: "Get account by puuid"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#account-v1/GET_getByPuuid'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#account-v1/GET_getByPuuid"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account-v1.AccountDto'
+                $ref: "#/components/schemas/account-v1.AccountDto"
                 x-type: AccountDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: account-v1.getByPuuid
-      description: 'Get account by puuid'
+      description: "Get account by puuid"
       parameters:
-        -
-          name: puuid
+        - name: puuid
           in: path
           required: true
           schema:
@@ -101,64 +99,62 @@ paths:
       - esports
       - europe
     x-route-enum: regional
-  '/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}':
+  "/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}":
     get:
       tags:
         - account-v1
-      summary: 'Get account by riot id'
+      summary: "Get account by riot id"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#account-v1/GET_getByRiotId'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#account-v1/GET_getByRiotId"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account-v1.AccountDto'
+                $ref: "#/components/schemas/account-v1.AccountDto"
                 x-type: AccountDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: account-v1.getByRiotId
       x-nullable-404: true
-      description: 'Get account by riot id'
+      description: "Get account by riot id"
       parameters:
-        -
-          name: tagLine
+        - name: tagLine
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'When querying for a player by their riot id, the gameName and tagLine query params are required.'
-        -
-          name: gameName
+          description: "When querying for a player by their riot id, the gameName and tagLine query params are required."
+        - name: gameName
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'When querying for a player by their riot id, the gameName and tagLine query params are required.'
+          description: "When querying for a player by their riot id, the gameName and tagLine query params are required."
       x-endpoint: account-v1
       x-platforms-available:
         - americas
@@ -177,45 +173,44 @@ paths:
     get:
       tags:
         - account-v1
-      summary: 'Get account by access token'
+      summary: "Get account by access token"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#account-v1/GET_getByAccessToken'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#account-v1/GET_getByAccessToken"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/account-v1.AccountDto'
+                $ref: "#/components/schemas/account-v1.AccountDto"
                 x-type: AccountDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: account-v1.getByAccessToken
-      description: 'Get account by access token'
+      description: "Get account by access token"
       parameters:
-        -
-          name: Authorization
+        - name: Authorization
           in: header
           required: true
           schema:
@@ -235,52 +230,51 @@ paths:
       - esports
       - europe
     x-route-enum: regional
-  '/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}':
+  "/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}":
     get:
       tags:
         - champion-mastery-v4
-      summary: 'Get all champion mastery entries sorted by number of champion points descending.'
+      summary: "Get all champion mastery entries sorted by number of champion points descending."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getAllChampionMasteriesByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getAllChampionMasteriesByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/champion-mastery-v4.ChampionMasteryDto'
+                  $ref: "#/components/schemas/champion-mastery-v4.ChampionMasteryDto"
                   x-type: ChampionMasteryDto
-                x-type: 'List[ChampionMasteryDto]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "List[ChampionMasteryDto]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: champion-mastery-v4.getAllChampionMasteriesByPUUID
-      description: 'Get all champion mastery entries sorted by number of champion points descending.'
+      description: "Get all champion mastery entries sorted by number of champion points descending."
       parameters:
-        -
-          name: encryptedPUUID
+        - name: encryptedPUUID
           in: path
           required: true
           schema:
@@ -324,63 +318,61 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}/by-champion/{championId}':
+  "/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}/by-champion/{championId}":
     get:
       tags:
         - champion-mastery-v4
-      summary: 'Get a champion mastery by puuid and champion ID.'
+      summary: "Get a champion mastery by puuid and champion ID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getChampionMasteryByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getChampionMasteryByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/champion-mastery-v4.ChampionMasteryDto'
+                $ref: "#/components/schemas/champion-mastery-v4.ChampionMasteryDto"
                 x-type: ChampionMasteryDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: champion-mastery-v4.getChampionMasteryByPUUID
-      description: 'Get a champion mastery by puuid and champion ID.'
+      description: "Get a champion mastery by puuid and champion ID."
       parameters:
-        -
-          name: encryptedPUUID
+        - name: encryptedPUUID
           in: path
           required: true
           schema:
             type: string
             x-type: string
-        -
-          name: championId
+        - name: championId
           in: path
           required: true
           schema:
             type: string
             x-type: string
             x-enum: champion
-          description: 'Champion ID to retrieve Champion Mastery.'
+          description: "Champion ID to retrieve Champion Mastery."
       x-endpoint: champion-mastery-v4
       x-platforms-available:
         - br1
@@ -419,66 +411,64 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}/top':
+  "/lol/champion-mastery/v4/champion-masteries/by-puuid/{encryptedPUUID}/top":
     get:
       tags:
         - champion-mastery-v4
-      summary: 'Get specified number of top champion mastery entries sorted by number of champion points descending.'
+      summary: "Get specified number of top champion mastery entries sorted by number of champion points descending."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getTopChampionMasteriesByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getTopChampionMasteriesByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/champion-mastery-v4.ChampionMasteryDto'
+                  $ref: "#/components/schemas/champion-mastery-v4.ChampionMasteryDto"
                   x-type: ChampionMasteryDto
-                x-type: 'List[ChampionMasteryDto]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "List[ChampionMasteryDto]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: champion-mastery-v4.getTopChampionMasteriesByPUUID
-      description: 'Get specified number of top champion mastery entries sorted by number of champion points descending.'
+      description: "Get specified number of top champion mastery entries sorted by number of champion points descending."
       parameters:
-        -
-          name: encryptedPUUID
+        - name: encryptedPUUID
           in: path
           required: true
           schema:
             type: string
             x-type: string
-        -
-          name: count
+        - name: count
           in: query
           required: false
           schema:
             type: integer
             format: int32
             x-type: int
-          description: 'Number of entries to retrieve, defaults to 3.'
+          description: "Number of entries to retrieve, defaults to 3."
       x-endpoint: champion-mastery-v4
       x-platforms-available:
         - br1
@@ -517,16 +507,16 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/champion-mastery/v4/scores/by-puuid/{encryptedPUUID}':
+  "/lol/champion-mastery/v4/scores/by-puuid/{encryptedPUUID}":
     get:
       tags:
         - champion-mastery-v4
-      summary: 'Get a player''s total champion mastery score, which is the sum of individual champion mastery levels.'
+      summary: "Get a player's total champion mastery score, which is the sum of individual champion mastery levels."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getChampionMasteryScoreByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#champion-mastery-v4/GET_getChampionMasteryScoreByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
@@ -534,33 +524,32 @@ paths:
                 type: integer
                 format: int32
                 x-type: int
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: champion-mastery-v4.getChampionMasteryScoreByPUUID
-      description: 'Get a player''s total champion mastery score, which is the sum of individual champion mastery levels.'
+      description: "Get a player's total champion mastery score, which is the sum of individual champion mastery levels."
       parameters:
-        -
-          name: encryptedPUUID
+        - name: encryptedPUUID
           in: path
           required: true
           schema:
@@ -608,42 +597,42 @@ paths:
     get:
       tags:
         - champion-v3
-      summary: 'Returns champion rotations, including free-to-play and low-level free-to-play rotations (REST)'
+      summary: "Returns champion rotations, including free-to-play and low-level free-to-play rotations (REST)"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#champion-v3/GET_getChampionInfo'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#champion-v3/GET_getChampionInfo"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/champion-v3.ChampionInfo'
+                $ref: "#/components/schemas/champion-v3.ChampionInfo"
                 x-type: ChampionInfo
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: champion-v3.getChampionInfo
-      description: 'Returns champion rotations, including free-to-play and low-level free-to-play rotations (REST)'
+      description: "Returns champion rotations, including free-to-play and low-level free-to-play rotations (REST)"
       x-endpoint: champion-v3
       x-platforms-available:
         - br1
@@ -682,52 +671,51 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league-exp/v4/entries/{queue}/{tier}/{division}':
+  "/lol/league-exp/v4/entries/{queue}/{tier}/{division}":
     get:
       tags:
         - league-exp-v4
-      summary: 'Get all the league entries.'
+      summary: "Get all the league entries."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-exp-v4/GET_getLeagueEntries'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-exp-v4/GET_getLeagueEntries"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/league-exp-v4.LeagueEntryDTO'
+                  $ref: "#/components/schemas/league-exp-v4.LeagueEntryDTO"
                   x-type: LeagueEntryDTO
-                x-type: 'Set[LeagueEntryDTO]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "Set[LeagueEntryDTO]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-exp-v4.getLeagueEntries
-      description: 'Get all the league entries.'
+      description: "Get all the league entries."
       parameters:
-        -
-          name: queue
+        - name: queue
           in: path
           required: true
           schema:
@@ -739,9 +727,8 @@ paths:
               - RANKED_TFT
               - RANKED_FLEX_SR
               - RANKED_FLEX_TT
-          description: 'Note that the queue value must be a valid ranked queue.'
-        -
-          name: tier
+          description: "Note that the queue value must be a valid ranked queue."
+        - name: tier
           in: path
           required: true
           schema:
@@ -759,8 +746,7 @@ paths:
               - SILVER
               - BRONZE
               - IRON
-        -
-          name: division
+        - name: division
           in: path
           required: true
           schema:
@@ -772,15 +758,14 @@ paths:
               - II
               - III
               - IV
-        -
-          name: page
+        - name: page
           in: query
           required: false
           schema:
             type: integer
             format: int32
             x-type: int
-          description: 'Defaults to 1. Starts with page 1.'
+          description: "Defaults to 1. Starts with page 1."
       x-endpoint: league-exp-v4
       x-platforms-available:
         - br1
@@ -819,49 +804,48 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/challengerleagues/by-queue/{queue}':
+  "/lol/league/v4/challengerleagues/by-queue/{queue}":
     get:
       tags:
         - league-v4
-      summary: 'Get the challenger league for given queue.'
+      summary: "Get the challenger league for given queue."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-v4/GET_getChallengerLeague'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-v4/GET_getChallengerLeague"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/league-v4.LeagueListDTO'
+                $ref: "#/components/schemas/league-v4.LeagueListDTO"
                 x-type: LeagueListDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-v4.getChallengerLeague
-      description: 'Get the challenger league for given queue.'
+      description: "Get the challenger league for given queue."
       parameters:
-        -
-          name: queue
+        - name: queue
           in: path
           required: true
           schema:
@@ -910,52 +894,51 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/entries/by-summoner/{encryptedSummonerId}':
+  "/lol/league/v4/entries/by-summoner/{encryptedSummonerId}":
     get:
       tags:
         - league-v4
-      summary: 'Get league entries in all queues for a given summoner ID.'
+      summary: "Get league entries in all queues for a given summoner ID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueEntriesForSummoner'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueEntriesForSummoner"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/league-v4.LeagueEntryDTO'
+                  $ref: "#/components/schemas/league-v4.LeagueEntryDTO"
                   x-type: LeagueEntryDTO
-                x-type: 'Set[LeagueEntryDTO]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "Set[LeagueEntryDTO]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-v4.getLeagueEntriesForSummoner
-      description: 'Get league entries in all queues for a given summoner ID.'
+      description: "Get league entries in all queues for a given summoner ID."
       parameters:
-        -
-          name: encryptedSummonerId
+        - name: encryptedSummonerId
           in: path
           required: true
           schema:
@@ -999,52 +982,51 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/entries/{queue}/{tier}/{division}':
+  "/lol/league/v4/entries/{queue}/{tier}/{division}":
     get:
       tags:
         - league-v4
-      summary: 'Get all the league entries.'
+      summary: "Get all the league entries."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueEntries'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueEntries"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/league-v4.LeagueEntryDTO'
+                  $ref: "#/components/schemas/league-v4.LeagueEntryDTO"
                   x-type: LeagueEntryDTO
-                x-type: 'Set[LeagueEntryDTO]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "Set[LeagueEntryDTO]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-v4.getLeagueEntries
-      description: 'Get all the league entries.'
+      description: "Get all the league entries."
       parameters:
-        -
-          name: division
+        - name: division
           in: path
           required: true
           schema:
@@ -1056,8 +1038,7 @@ paths:
               - II
               - III
               - IV
-        -
-          name: tier
+        - name: tier
           in: path
           required: true
           schema:
@@ -1072,8 +1053,7 @@ paths:
               - SILVER
               - BRONZE
               - IRON
-        -
-          name: queue
+        - name: queue
           in: path
           required: true
           schema:
@@ -1084,16 +1064,15 @@ paths:
               - RANKED_SOLO_5x5
               - RANKED_FLEX_SR
               - RANKED_FLEX_TT
-          description: 'Note that the queue value must be a valid ranked queue.'
-        -
-          name: page
+          description: "Note that the queue value must be a valid ranked queue."
+        - name: page
           in: query
           required: false
           schema:
             type: integer
             format: int32
             x-type: int
-          description: 'Defaults to 1. Starts with page 1.'
+          description: "Defaults to 1. Starts with page 1."
       x-endpoint: league-v4
       x-platforms-available:
         - br1
@@ -1132,49 +1111,48 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/grandmasterleagues/by-queue/{queue}':
+  "/lol/league/v4/grandmasterleagues/by-queue/{queue}":
     get:
       tags:
         - league-v4
-      summary: 'Get the grandmaster league of a specific queue.'
+      summary: "Get the grandmaster league of a specific queue."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-v4/GET_getGrandmasterLeague'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-v4/GET_getGrandmasterLeague"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/league-v4.LeagueListDTO'
+                $ref: "#/components/schemas/league-v4.LeagueListDTO"
                 x-type: LeagueListDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-v4.getGrandmasterLeague
-      description: 'Get the grandmaster league of a specific queue.'
+      description: "Get the grandmaster league of a specific queue."
       parameters:
-        -
-          name: queue
+        - name: queue
           in: path
           required: true
           schema:
@@ -1223,56 +1201,55 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/leagues/{leagueId}':
+  "/lol/league/v4/leagues/{leagueId}":
     get:
       tags:
         - league-v4
-      summary: 'Get league with given ID, including inactive entries.'
+      summary: "Get league with given ID, including inactive entries."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueById'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#league-v4/GET_getLeagueById"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/league-v4.LeagueListDTO'
+                $ref: "#/components/schemas/league-v4.LeagueListDTO"
                 x-type: LeagueListDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: league-v4.getLeagueById
       x-nullable-404: true
-      description: 'Get league with given ID, including inactive entries.'
+      description: "Get league with given ID, including inactive entries."
       parameters:
-        -
-          name: leagueId
+        - name: leagueId
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'The UUID of the league.'
+          description: "The UUID of the league."
       x-endpoint: league-v4
       x-platforms-available:
         - br1
@@ -1311,21 +1288,21 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/league/v4/masterleagues/by-queue/{queue}':
+  "/lol/league/v4/masterleagues/by-queue/{queue}":
     get:
       tags:
         - lol-challenges-v1
-      summary: 'Map of level to percentile of players who have achieved it'
+      summary: "Map of level to percentile of players who have achieved it"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#lol-challenges-v1/GET_getChallengePercentiles'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#lol-challenges-v1/GET_getChallengePercentiles"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                x-type: 'Map[Level, Double]'
+                x-type: "Map[Level, Double]"
                 type: object
                 x-key:
                   type: string
@@ -1335,34 +1312,33 @@ paths:
                   type: number
                   format: double
                   x-type: double
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: lol-challenges-v1.getChallengePercentiles
       x-nullable-404: true
-      description: 'Map of level to percentile of players who have achieved it'
+      description: "Map of level to percentile of players who have achieved it"
       parameters:
-        -
-          name: challengeId
+        - name: challengeId
           in: path
           required: true
           schema:
@@ -1409,16 +1385,16 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/match/v5/matches/by-puuid/{puuid}/ids':
+  "/lol/match/v5/matches/by-puuid/{puuid}/ids":
     get:
       tags:
         - match-v5
-      summary: 'Get a list of match ids by puuid'
+      summary: "Get a list of match ids by puuid"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#match-v5/GET_getMatchIdsByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#match-v5/GET_getMatchIdsByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
@@ -1427,59 +1403,55 @@ paths:
                 items:
                   type: string
                   x-type: string
-                x-type: 'List[string]'
-        '400':
-          description: 'Bad request'
-        '401':
+                x-type: "List[string]"
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: match-v5.getMatchIdsByPUUID
-      description: 'Get a list of match ids by puuid'
+      description: "Get a list of match ids by puuid"
       parameters:
-        -
-          name: puuid
+        - name: puuid
           in: path
           required: true
           schema:
             type: string
             x-type: String
-        -
-          name: startTime
+        - name: startTime
           in: query
           required: false
           schema:
             type: integer
             format: int64
             x-type: long
-          description: 'Epoch timestamp in seconds. The matchlist started storing timestamps on June 16th, 2021. Any matches played before June 16th, 2021 won''t be included in the results if the startTime filter is set.'
-        -
-          name: endTime
+          description: "Epoch timestamp in seconds. The matchlist started storing timestamps on June 16th, 2021. Any matches played before June 16th, 2021 won't be included in the results if the startTime filter is set."
+        - name: endTime
           in: query
           required: false
           schema:
             type: integer
             format: int64
             x-type: long
-          description: 'Epoch timestamp in seconds.'
-        -
-          name: queue
+          description: "Epoch timestamp in seconds."
+        - name: queue
           in: query
           required: false
           schema:
@@ -1487,9 +1459,8 @@ paths:
             format: int32
             x-type: int
             x-enum: queue
-          description: 'Filter the list of match ids by a specific queue id. This filter is mutually inclusive of the type filter meaning any match ids returned must match both the queue and type filters.'
-        -
-          name: type
+          description: "Filter the list of match ids by a specific queue id. This filter is mutually inclusive of the type filter meaning any match ids returned must match both the queue and type filters."
+        - name: type
           in: query
           required: false
           schema:
@@ -1500,25 +1471,23 @@ paths:
               - normal
               - tourney
               - tutorial
-          description: 'Filter the list of match ids by the type of match. This filter is mutually inclusive of the queue filter meaning any match ids returned must match both the queue and type filters.'
-        -
-          name: start
+          description: "Filter the list of match ids by the type of match. This filter is mutually inclusive of the queue filter meaning any match ids returned must match both the queue and type filters."
+        - name: start
           in: query
           required: false
           schema:
             type: integer
             format: int32
             x-type: int
-          description: 'Defaults to 0. Start index.'
-        -
-          name: count
+          description: "Defaults to 0. Start index."
+        - name: count
           in: query
           required: false
           schema:
             type: integer
             format: int32
             x-type: int
-          description: 'Defaults to 20. Valid values: 0 to 100. Number of match ids to return.'
+          description: "Defaults to 20. Valid values: 0 to 100. Number of match ids to return."
       x-endpoint: match-v5
       x-platforms-available:
         - americas
@@ -1533,50 +1502,49 @@ paths:
       - europe
       - sea
     x-route-enum: regional
-  '/lol/match/v5/matches/{matchId}':
+  "/lol/match/v5/matches/{matchId}":
     get:
       tags:
         - match-v5
-      summary: 'Get a match by match id'
+      summary: "Get a match by match id"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#match-v5/GET_getMatch'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#match-v5/GET_getMatch"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/match-v5.MatchDto'
+                $ref: "#/components/schemas/match-v5.MatchDto"
                 x-type: MatchDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: match-v5.getMatch
       x-nullable-404: true
-      description: 'Get a match by match id'
+      description: "Get a match by match id"
       parameters:
-        -
-          name: matchId
+        - name: matchId
           in: path
           required: true
           schema:
@@ -1596,50 +1564,49 @@ paths:
       - europe
       - sea
     x-route-enum: regional
-  '/lol/match/v5/matches/{matchId}/timeline':
+  "/lol/match/v5/matches/{matchId}/timeline":
     get:
       tags:
         - match-v5
-      summary: 'Get a match timeline by match id'
+      summary: "Get a match timeline by match id"
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#match-v5/GET_getTimeline'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#match-v5/GET_getTimeline"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/match-v5.MatchTimelineDto'
+                $ref: "#/components/schemas/match-v5.MatchTimelineDto"
                 x-type: MatchTimelineDto
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: match-v5.getTimeline
       x-nullable-404: true
-      description: 'Get a match timeline by match id'
+      description: "Get a match timeline by match id"
       parameters:
-        -
-          name: matchId
+        - name: matchId
           in: path
           required: true
           schema:
@@ -1659,56 +1626,55 @@ paths:
       - europe
       - sea
     x-route-enum: regional
-  '/lol/spectator/v4/active-games/by-summoner/{encryptedSummonerId}':
+  "/lol/spectator/v4/active-games/by-summoner/{encryptedSummonerId}":
     get:
       tags:
         - spectator-v4
-      summary: 'Get current game information for the given summoner ID.'
+      summary: "Get current game information for the given summoner ID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#spectator-v4/GET_getCurrentGameInfoBySummoner'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#spectator-v4/GET_getCurrentGameInfoBySummoner"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/spectator-v4.CurrentGameInfo'
+                $ref: "#/components/schemas/spectator-v4.CurrentGameInfo"
                 x-type: CurrentGameInfo
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: spectator-v4.getCurrentGameInfoBySummoner
       x-nullable-404: true
-      description: 'Get current game information for the given summoner ID.'
+      description: "Get current game information for the given summoner ID."
       parameters:
-        -
-          name: encryptedSummonerId
+        - name: encryptedSummonerId
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'The ID of the summoner.'
+          description: "The ID of the summoner."
       x-endpoint: spectator-v4
       x-platforms-available:
         - br1
@@ -1751,42 +1717,42 @@ paths:
     get:
       tags:
         - spectator-v4
-      summary: 'Get list of featured games.'
+      summary: "Get list of featured games."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#spectator-v4/GET_getFeaturedGames'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#spectator-v4/GET_getFeaturedGames"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/spectator-v4.FeaturedGames'
+                $ref: "#/components/schemas/spectator-v4.FeaturedGames"
                 x-type: FeaturedGames
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: spectator-v4.getFeaturedGames
-      description: 'Get list of featured games.'
+      description: "Get list of featured games."
       x-endpoint: spectator-v4
       x-platforms-available:
         - br1
@@ -1825,49 +1791,48 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/summoner/v4/summoners/by-account/{encryptedAccountId}':
+  "/lol/summoner/v4/summoners/by-account/{encryptedAccountId}":
     get:
       tags:
         - summoner-v4
-      summary: 'Get a summoner by account ID.'
+      summary: "Get a summoner by account ID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByAccountId'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByAccountId"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-v4.SummonerDTO'
+                $ref: "#/components/schemas/summoner-v4.SummonerDTO"
                 x-type: SummonerDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: summoner-v4.getByAccountId
-      description: 'Get a summoner by account ID.'
+      description: "Get a summoner by account ID."
       parameters:
-        -
-          name: encryptedAccountId
+        - name: encryptedAccountId
           in: path
           required: true
           schema:
@@ -1911,56 +1876,55 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/summoner/v4/summoners/by-name/{summonerName}':
+  "/lol/summoner/v4/summoners/by-name/{summonerName}":
     get:
       tags:
         - summoner-v4
-      summary: 'Get a summoner by summoner name.'
+      summary: "Get a summoner by summoner name."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#summoner-v4/GET_getBySummonerName'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#summoner-v4/GET_getBySummonerName"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-v4.SummonerDTO'
+                $ref: "#/components/schemas/summoner-v4.SummonerDTO"
                 x-type: SummonerDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: summoner-v4.getBySummonerName
       x-nullable-404: true
-      description: 'Get a summoner by summoner name.'
+      description: "Get a summoner by summoner name."
       parameters:
-        -
-          name: summonerName
+        - name: summonerName
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'Summoner Name'
+          description: "Summoner Name"
       x-endpoint: summoner-v4
       x-platforms-available:
         - br1
@@ -1999,55 +1963,54 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/summoner/v4/summoners/by-puuid/{encryptedPUUID}':
+  "/lol/summoner/v4/summoners/by-puuid/{encryptedPUUID}":
     get:
       tags:
         - summoner-v4
-      summary: 'Get a summoner by PUUID.'
+      summary: "Get a summoner by PUUID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByPUUID'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByPUUID"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-v4.SummonerDTO'
+                $ref: "#/components/schemas/summoner-v4.SummonerDTO"
                 x-type: SummonerDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: summoner-v4.getByPUUID
-      description: 'Get a summoner by PUUID.'
+      description: "Get a summoner by PUUID."
       parameters:
-        -
-          name: encryptedPUUID
+        - name: encryptedPUUID
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'Summoner ID'
+          description: "Summoner ID"
       x-endpoint: summoner-v4
       x-platforms-available:
         - br1
@@ -2090,51 +2053,50 @@ paths:
     get:
       tags:
         - summoner-v4
-      summary: 'Get a summoner by access token.'
+      summary: "Get a summoner by access token."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByAccessToken'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#summoner-v4/GET_getByAccessToken"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-v4.SummonerDTO'
+                $ref: "#/components/schemas/summoner-v4.SummonerDTO"
                 x-type: SummonerDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: summoner-v4.getByAccessToken
-      description: 'Get a summoner by access token.'
+      description: "Get a summoner by access token."
       parameters:
-        -
-          name: Authorization
+        - name: Authorization
           in: header
           required: false
           schema:
             type: string
             x-type: string
-          description: 'Bearer token'
+          description: "Bearer token"
       x-endpoint: summoner-v4
       x-platforms-available:
         - br1
@@ -2173,55 +2135,54 @@ paths:
       - tw2
       - vn2
     x-route-enum: platform
-  '/lol/summoner/v4/summoners/{encryptedSummonerId}':
+  "/lol/summoner/v4/summoners/{encryptedSummonerId}":
     get:
       tags:
         - summoner-v4
-      summary: 'Get a summoner by summoner ID.'
+      summary: "Get a summoner by summoner ID."
       externalDocs:
-        description: 'Official API Reference'
-        url: 'https://developer.riotgames.com/api-methods/#summoner-v4/GET_getBySummonerId'
+        description: "Official API Reference"
+        url: "https://developer.riotgames.com/api-methods/#summoner-v4/GET_getBySummonerId"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-v4.SummonerDTO'
+                $ref: "#/components/schemas/summoner-v4.SummonerDTO"
                 x-type: SummonerDTO
-        '400':
-          description: 'Bad request'
-        '401':
+        "400":
+          description: "Bad request"
+        "401":
           description: Unauthorized
-        '403':
+        "403":
           description: Forbidden
-        '404':
-          description: 'Data not found'
-        '405':
-          description: 'Method not allowed'
-        '415':
-          description: 'Unsupported media type'
-        '429':
-          description: 'Rate limit exceeded'
-        '500':
-          description: 'Internal server error'
-        '502':
-          description: 'Bad gateway'
-        '503':
-          description: 'Service unavailable'
-        '504':
-          description: 'Gateway timeout'
+        "404":
+          description: "Data not found"
+        "405":
+          description: "Method not allowed"
+        "415":
+          description: "Unsupported media type"
+        "429":
+          description: "Rate limit exceeded"
+        "500":
+          description: "Internal server error"
+        "502":
+          description: "Bad gateway"
+        "503":
+          description: "Service unavailable"
+        "504":
+          description: "Gateway timeout"
       operationId: summoner-v4.getBySummonerId
-      description: 'Get a summoner by summoner ID.'
+      description: "Get a summoner by summoner ID."
       parameters:
-        -
-          name: encryptedSummonerId
+        - name: encryptedSummonerId
           in: path
           required: true
           schema:
             type: string
             x-type: string
-          description: 'Summoner ID'
+          description: "Summoner ID"
       x-endpoint: summoner-v4
       x-platforms-available:
         - br1
@@ -2282,11 +2243,11 @@ components:
         gameName:
           type: string
           x-type: string
-          description: 'This field may be excluded from the response if the account doesn''t have a gameName.'
+          description: "This field may be excluded from the response if the account doesn't have a gameName."
         tagLine:
           type: string
           x-type: string
-          description: 'This field may be excluded from the response if the account doesn''t have a tagLine.'
+          description: "This field may be excluded from the response if the account doesn't have a tagLine."
       required:
         - puuid
     account-v1.ActiveShardDto:
@@ -2314,50 +2275,50 @@ components:
           type: integer
           format: int64
           x-type: long
-          description: 'Number of points needed to achieve next level. Zero if player reached maximum champion level for this champion.'
+          description: "Number of points needed to achieve next level. Zero if player reached maximum champion level for this champion."
         chestGranted:
           type: boolean
           x-type: boolean
-          description: 'Is chest granted for this champion or not in current season.'
+          description: "Is chest granted for this champion or not in current season."
         championId:
           type: integer
           format: int64
           x-type: long
-          description: 'Champion ID for this entry.'
+          description: "Champion ID for this entry."
           x-enum: champion
         lastPlayTime:
           type: integer
           format: int64
           x-type: long
-          description: 'Last time this champion was played by this player - in Unix milliseconds time format.'
+          description: "Last time this champion was played by this player - in Unix milliseconds time format."
         championLevel:
           type: integer
           format: int32
           x-type: int
-          description: 'Champion level for specified player and champion combination.'
+          description: "Champion level for specified player and champion combination."
         summonerId:
           type: string
           x-type: string
-          description: 'Summoner ID for this entry. (Encrypted)'
+          description: "Summoner ID for this entry. (Encrypted)"
         championPoints:
           type: integer
           format: int32
           x-type: int
-          description: 'Total number of champion points for this player and champion combination - they are used to determine championLevel.'
+          description: "Total number of champion points for this player and champion combination - they are used to determine championLevel."
         championPointsSinceLastLevel:
           type: integer
           format: int64
           x-type: long
-          description: 'Number of points earned since current level has been achieved.'
+          description: "Number of points earned since current level has been achieved."
         tokensEarned:
           type: integer
           format: int32
           x-type: int
-          description: 'The token earned for this champion at the current championLevel. When the championLevel is advanced the tokensEarned resets to 0.'
+          description: "The token earned for this champion at the current championLevel. When the championLevel is advanced the tokensEarned resets to 0."
         puuid:
           type: string
           x-type: string
-      description: 'This object contains single Champion Mastery information for player and champion combination.'
+      description: "This object contains single Champion Mastery information for player and champion combination."
       required:
         - championPointsUntilNextLevel
         - chestGranted
@@ -2383,7 +2344,7 @@ components:
             format: int32
             x-type: int
             x-enum: champion
-          x-type: 'List[int]'
+          x-type: "List[int]"
         freeChampionIds:
           type: array
           items:
@@ -2391,7 +2352,7 @@ components:
             format: int32
             x-type: int
             x-enum: champion
-          x-type: 'List[int]'
+          x-type: "List[int]"
       required:
         - maxNewPlayerLevel
         - freeChampionIdsForNewPlayers
@@ -2406,7 +2367,7 @@ components:
         summonerId:
           type: string
           x-type: string
-          description: 'Player''s summonerId (Encrypted)'
+          description: "Player's summonerId (Encrypted)"
         summonerName:
           type: string
           x-type: string
@@ -2421,7 +2382,7 @@ components:
         rank:
           type: string
           x-type: string
-          description: 'The player''s division within a tier.'
+          description: "The player's division within a tier."
           x-enum: division
         leaguePoints:
           type: integer
@@ -2431,12 +2392,12 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'Winning team on Summoners Rift. First placement in Teamfight Tactics.'
+          description: "Winning team on Summoners Rift. First placement in Teamfight Tactics."
         losses:
           type: integer
           format: int32
           x-type: int
-          description: 'Losing team on Summoners Rift. Second through eighth placement in Teamfight Tactics.'
+          description: "Losing team on Summoners Rift. Second through eighth placement in Teamfight Tactics."
         hotStreak:
           type: boolean
           x-type: boolean
@@ -2450,7 +2411,7 @@ components:
           type: boolean
           x-type: boolean
         miniSeries:
-          $ref: '#/components/schemas/league-exp-v4.MiniSeriesDTO'
+          $ref: "#/components/schemas/league-exp-v4.MiniSeriesDTO"
           x-type: MiniSeriesDTO
       required:
         - leagueId
@@ -2500,9 +2461,9 @@ components:
         entries:
           type: array
           items:
-            $ref: '#/components/schemas/league-v4.LeagueItemDTO'
+            $ref: "#/components/schemas/league-v4.LeagueItemDTO"
             x-type: LeagueItemDTO
-          x-type: 'List[LeagueItemDTO]'
+          x-type: "List[LeagueItemDTO]"
         tier:
           type: string
           x-type: string
@@ -2528,12 +2489,12 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'Winning team on Summoners Rift.'
+          description: "Winning team on Summoners Rift."
         summonerName:
           type: string
           x-type: string
         miniSeries:
-          $ref: '#/components/schemas/league-v4.MiniSeriesDTO'
+          $ref: "#/components/schemas/league-v4.MiniSeriesDTO"
           x-type: MiniSeriesDTO
         inactive:
           type: boolean
@@ -2556,11 +2517,11 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'Losing team on Summoners Rift.'
+          description: "Losing team on Summoners Rift."
         summonerId:
           type: string
           x-type: string
-          description: 'Player''s encrypted summonerId.'
+          description: "Player's encrypted summonerId."
       required:
         - freshBlood
         - wins
@@ -2606,7 +2567,7 @@ components:
         summonerId:
           type: string
           x-type: string
-          description: 'Player''s encrypted summonerId.'
+          description: "Player's encrypted summonerId."
         summonerName:
           type: string
           x-type: string
@@ -2621,7 +2582,7 @@ components:
         rank:
           type: string
           x-type: string
-          description: 'The player''s division within a tier.'
+          description: "The player's division within a tier."
           x-enum: division
         leaguePoints:
           type: integer
@@ -2631,12 +2592,12 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'Winning team on Summoners Rift.'
+          description: "Winning team on Summoners Rift."
         losses:
           type: integer
           format: int32
           x-type: int
-          description: 'Losing team on Summoners Rift.'
+          description: "Losing team on Summoners Rift."
         hotStreak:
           type: boolean
           x-type: boolean
@@ -2650,7 +2611,7 @@ components:
           type: boolean
           x-type: boolean
         miniSeries:
-          $ref: '#/components/schemas/league-v4.MiniSeriesDTO'
+          $ref: "#/components/schemas/league-v4.MiniSeriesDTO"
           x-type: MiniSeriesDTO
       required:
         - summonerId
@@ -2676,13 +2637,13 @@ components:
       title: MatchDto
       properties:
         metadata:
-          $ref: '#/components/schemas/match-v5.MetadataDto'
+          $ref: "#/components/schemas/match-v5.MetadataDto"
           x-type: MetadataDto
-          description: 'Match metadata.'
+          description: "Match metadata."
         info:
-          $ref: '#/components/schemas/match-v5.InfoDto'
+          $ref: "#/components/schemas/match-v5.InfoDto"
           x-type: InfoDto
-          description: 'Match info.'
+          description: "Match info."
       required:
         - metadata
         - info
@@ -2693,18 +2654,18 @@ components:
         dataVersion:
           type: string
           x-type: string
-          description: 'Match data version.'
+          description: "Match data version."
         matchId:
           type: string
           x-type: string
-          description: 'Match id.'
+          description: "Match id."
         participants:
           type: array
           items:
             type: string
             x-type: string
-          x-type: 'List[string]'
-          description: 'A list of participant PUUIDs.'
+          x-type: "List[string]"
+          description: "A list of participant PUUIDs."
       required:
         - dataVersion
         - matchId
@@ -2717,12 +2678,12 @@ components:
           type: integer
           format: int64
           x-type: long
-          description: 'Unix timestamp for when the game is created on the game server (i.e., the loading screen).'
+          description: "Unix timestamp for when the game is created on the game server (i.e., the loading screen)."
         gameDuration:
           type: integer
           format: int64
           x-type: long
-          description: 'Prior to patch 11.20, this field returns the game length in milliseconds calculated from gameEndTimestamp - gameStartTimestamp. Post patch 11.20, this field returns the max timePlayed of any participant in the game in seconds, which makes the behavior of this field consistent with that of match-v4. The best way to handling the change in this field is to treat the value as milliseconds if the gameEndTimestamp field isn''t in the response and to treat the value as seconds if gameEndTimestamp is in the response.'
+          description: "Prior to patch 11.20, this field returns the game length in milliseconds calculated from gameEndTimestamp - gameStartTimestamp. Post patch 11.20, this field returns the max timePlayed of any participant in the game in seconds, which makes the behavior of this field consistent with that of match-v4. The best way to handling the change in this field is to treat the value as milliseconds if the gameEndTimestamp field isn't in the response and to treat the value as seconds if gameEndTimestamp is in the response."
         gameEndTimestamp:
           type: integer
           format: int64
@@ -2735,7 +2696,7 @@ components:
         gameMode:
           type: string
           x-type: string
-          description: 'Refer to the Game Constants documentation.'
+          description: "Refer to the Game Constants documentation."
           x-enum: gameMode
         gameName:
           type: string
@@ -2744,7 +2705,7 @@ components:
           type: integer
           format: int64
           x-type: long
-          description: 'Unix timestamp for when match starts on the game server.'
+          description: "Unix timestamp for when match starts on the game server."
         gameType:
           type: string
           x-type: string
@@ -2752,39 +2713,39 @@ components:
         gameVersion:
           type: string
           x-type: string
-          description: 'The first two parts can be used to determine the patch a game was played on.'
+          description: "The first two parts can be used to determine the patch a game was played on."
         mapId:
           type: integer
           format: int32
           x-type: int
-          description: 'Refer to the Game Constants documentation.'
+          description: "Refer to the Game Constants documentation."
           x-enum: map
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.ParticipantDto'
+            $ref: "#/components/schemas/match-v5.ParticipantDto"
             x-type: ParticipantDto
-          x-type: 'List[ParticipantDto]'
+          x-type: "List[ParticipantDto]"
         platformId:
           type: string
           x-type: string
-          description: 'Platform where the match was played.'
+          description: "Platform where the match was played."
         queueId:
           type: integer
           format: int32
           x-type: int
-          description: 'Refer to the Game Constants documentation.'
+          description: "Refer to the Game Constants documentation."
           x-enum: queue
         teams:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.TeamDto'
+            $ref: "#/components/schemas/match-v5.TeamDto"
             x-type: TeamDto
-          x-type: 'List[TeamDto]'
+          x-type: "List[TeamDto]"
         tournamentCode:
           type: string
           x-type: string
-          description: 'Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021.'
+          description: "Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021."
       required:
         - gameCreation
         - gameDuration
@@ -2827,7 +2788,7 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds. We recommend determining the champion based on the championName field for matches played prior to patch 11.4.'
+          description: "Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds. We recommend determining the champion based on the championName field for matches played prior to patch 11.4."
           x-enum: champion
         championName:
           type: string
@@ -2836,7 +2797,7 @@ components:
           type: integer
           format: int32
           x-type: int
-          description: 'This field is currently only utilized for Kayn''s transformations. (Legal values: 0 - None, 1 - Slayer, 2 - Assassin)'
+          description: "This field is currently only utilized for Kayn's transformations. (Legal values: 0 - None, 1 - Slayer, 2 - Assassin)"
         consumablesPurchased:
           type: integer
           format: int32
@@ -2902,7 +2863,7 @@ components:
         individualPosition:
           type: string
           x-type: string
-          description: 'Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.'
+          description: "Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field."
         inhibitorKills:
           type: integer
           format: int32
@@ -3019,7 +2980,7 @@ components:
           format: int32
           x-type: int
         perks:
-          $ref: '#/components/schemas/match-v5.PerksDto'
+          $ref: "#/components/schemas/match-v5.PerksDto"
           x-type: PerksDto
         physicalDamageDealt:
           type: integer
@@ -3113,7 +3074,7 @@ components:
         teamPosition:
           type: string
           x-type: string
-          description: 'Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.'
+          description: "Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field."
         timeCCingOthers:
           type: integer
           format: int32
@@ -3273,7 +3234,7 @@ components:
           type: boolean
           x-type: boolean
         challenges:
-          $ref: '#/components/schemas/match-v5.ParticipantChallenges'
+          $ref: "#/components/schemas/match-v5.ParticipantChallenges"
           x-type: ParticipantChallenges
         totalAllyJungleMinionsKilled:
           type: integer
@@ -3312,7 +3273,7 @@ components:
           format: int32
           x-type: int
         missions:
-          $ref: '#/components/schemas/match-v5.ParticipantMissions'
+          $ref: "#/components/schemas/match-v5.ParticipantMissions"
           x-type: ParticipantMissions
         playerScore0:
           type: integer
@@ -3465,14 +3426,14 @@ components:
       title: PerksDto
       properties:
         statPerks:
-          $ref: '#/components/schemas/match-v5.PerkStatsDto'
+          $ref: "#/components/schemas/match-v5.PerkStatsDto"
           x-type: PerkStatsDto
         styles:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.PerkStyleDto'
+            $ref: "#/components/schemas/match-v5.PerkStyleDto"
             x-type: PerkStyleDto
-          x-type: 'List[PerkStyleDto]'
+          x-type: "List[PerkStyleDto]"
       required:
         - statPerks
         - styles
@@ -3506,9 +3467,9 @@ components:
         selections:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.PerkStyleSelectionDto'
+            $ref: "#/components/schemas/match-v5.PerkStyleSelectionDto"
             x-type: PerkStyleSelectionDto
-          x-type: 'List[PerkStyleSelectionDto]'
+          x-type: "List[PerkStyleSelectionDto]"
         style:
           type: integer
           format: int32
@@ -3549,11 +3510,11 @@ components:
         bans:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.BanDto'
+            $ref: "#/components/schemas/match-v5.BanDto"
             x-type: BanDto
-          x-type: 'List[BanDto]'
+          x-type: "List[BanDto]"
         objectives:
-          $ref: '#/components/schemas/match-v5.ObjectivesDto'
+          $ref: "#/components/schemas/match-v5.ObjectivesDto"
           x-type: ObjectivesDto
         teamId:
           type: integer
@@ -3589,25 +3550,25 @@ components:
       title: ObjectivesDto
       properties:
         baron:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         champion:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         dragon:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         inhibitor:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         riftHerald:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         tower:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
         horde:
-          $ref: '#/components/schemas/match-v5.ObjectiveDto'
+          $ref: "#/components/schemas/match-v5.ObjectiveDto"
           x-type: ObjectiveDto
       required:
         - baron
@@ -3635,9 +3596,9 @@ components:
       type: object
       properties:
         metadata:
-          $ref: '#/components/schemas/match-v5.MetadataDto'
+          $ref: "#/components/schemas/match-v5.MetadataDto"
         info:
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfo'
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfo"
       required:
         - metadata
         - info
@@ -3651,39 +3612,39 @@ components:
     summoner-v4.SummonerDTO:
       title: SummonerDTO
       type: object
-      description: 'represents a summoner'
+      description: "represents a summoner"
       properties:
         accountId:
           type: string
           x-type: string
-          description: 'Encrypted account ID. Max length 56 characters.'
+          description: "Encrypted account ID. Max length 56 characters."
         profileIconId:
           type: integer
           format: int32
           x-type: int
-          description: 'ID of the summoner icon associated with the summoner.'
+          description: "ID of the summoner icon associated with the summoner."
         revisionDate:
           type: integer
           format: int64
           x-type: long
-          description: 'Date summoner was last modified specified as epoch milliseconds. The following events will update this timestamp: profile icon change, playing the tutorial or advanced tutorial, finishing a game, summoner name change'
+          description: "Date summoner was last modified specified as epoch milliseconds. The following events will update this timestamp: profile icon change, playing the tutorial or advanced tutorial, finishing a game, summoner name change"
         name:
           type: string
           x-type: string
-          description: 'Summoner name.'
+          description: "Summoner name."
         id:
           type: string
           x-type: string
-          description: 'Encrypted summoner ID. Max length 63 characters.'
+          description: "Encrypted summoner ID. Max length 63 characters."
         puuid:
           type: string
           x-type: string
-          description: 'Encrypted PUUID. Exact length of 78 characters.'
+          description: "Encrypted PUUID. Exact length of 78 characters."
         summonerLevel:
           type: integer
           format: int64
           x-type: long
-          description: 'Summoner level associated with the summoner.'
+          description: "Summoner level associated with the summoner."
       required:
         - accountId
         - profileIconId
@@ -4358,15 +4319,15 @@ components:
           type: integer
           format: int32
         position:
-          $ref: '#/components/schemas/match-v5.MatchTimelinePosition'
+          $ref: "#/components/schemas/match-v5.MatchTimelinePosition"
         victimDamageDealt:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameEventVictimDamageDealt'
+            $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameEventVictimDamageDealt"
         victimDamageReceived:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameEventVictimDamageDealt'
+            $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameEventVictimDamageDealt"
         victimId:
           type: integer
           format: int32
@@ -4594,12 +4555,12 @@ components:
       type: object
       properties:
         championStats:
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrameChampionStats'
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrameChampionStats"
         currentGold:
           type: integer
           format: int32
         damageStats:
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrameDamageStats'
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrameDamageStats"
         goldPerSecond:
           type: integer
           format: int32
@@ -4616,7 +4577,7 @@ components:
           type: integer
           format: int32
         position:
-          $ref: '#/components/schemas/match-v5.MatchTimelinePosition'
+          $ref: "#/components/schemas/match-v5.MatchTimelinePosition"
         timeEnemySpentControlled:
           type: integer
           format: int32
@@ -4643,37 +4604,37 @@ components:
       title: MatchTimelineInfoFrameParticipantFrames
       type: object
       properties:
-        '1':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '2':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '3':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '4':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '5':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '6':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '7':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '8':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-        '9':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-          description: 'Possibly null for the Arena 2v2v2v2 (`CHERRY`) game mode.'
-        '10':
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame'
-          description: 'Possibly null for the Arena 2v2v2v2 (`CHERRY`) game mode.'
+        "1":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "2":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "3":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "4":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "5":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "6":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "7":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "8":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+        "9":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+          description: "Possibly null for the Arena 2v2v2v2 (`CHERRY`) game mode."
+        "10":
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrame"
+          description: "Possibly null for the Arena 2v2v2v2 (`CHERRY`) game mode."
       required:
-        - '1'
-        - '2'
-        - '3'
-        - '4'
-        - '5'
-        - '6'
-        - '7'
-        - '8'
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "6"
+        - "7"
+        - "8"
     match-v5.MatchTimelineInfoFrame:
       title: MatchTimelineInfoFrame
       type: object
@@ -4681,9 +4642,9 @@ components:
         events:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameEvent'
+            $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameEvent"
         participantFrames:
-          $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrames'
+          $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrameParticipantFrames"
         timestamp:
           type: integer
           format: int32
@@ -4750,30 +4711,28 @@ components:
         frames:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.MatchTimelineInfoFrame'
+            $ref: "#/components/schemas/match-v5.MatchTimelineInfoFrame"
         gameId:
           type: integer
           format: int64
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/match-v5.MatchTimelineInfoParticipant'
+            $ref: "#/components/schemas/match-v5.MatchTimelineInfoParticipant"
       required:
         - frameInterval
         - frames
   securitySchemes:
     api_key:
       type: apiKey
-      description: 'API key in query param.'
+      description: "API key in query param."
       name: api_key
       in: query
     X-Riot-Token:
       type: apiKey
-      description: 'API key in header.'
+      description: "API key in header."
       name: X-Riot-Token
       in: header
 security:
-  -
-    api_key: []
-  -
-    X-Riot-Token: []
+  - api_key: []
+  - X-Riot-Token: []

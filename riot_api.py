@@ -8,6 +8,8 @@ import pandas as pd
 import psycopg2
 import requests
 
+from constants import MASS_REGIONS, REGIONS
+
 riot_api_key = os.getenv("RIOT_API_KEY")
 
 
@@ -23,21 +25,27 @@ class RiotAPI:
             "Origin": "https://developer.riotgames.com",
             "X-Riot-Token": riot_api_key,
         }
-        self.request_regions = [
-            "br1",
-            "eun1",
-            "euw1",
-            "jp1",
-            "kr",
-            "la1",
-            "la2",
-            "na1",
-            "oc1",
-            "ru",
-            "tr1",
-        ]
+        self.regions = REGIONS
+        self.mass_regions = MASS_REGIONS
 
-    def get_puuid(self, request_ref, summoner_name, region, db):
+    def mass_region(self, region):
+        mass_region = str()
+        tagline = str()
+        if region in ["euw1", "eun1", "ru", "tr1"]:
+            mass_region = "europe"
+        elif region in ["br1", "la1", "la2", "na1"]:
+            mass_region = "americas"
+        else:
+            mass_region = "asia"
+        if region in ["br1", "jp1", "kr", "la1", "la2", "ru", "na1", "tr1", "oc1"]:
+            tagline = region.upper()
+        elif region == "euw1":
+            tagline = "EUW"
+        elif region == "eun1":
+            tagline = "EUNE"
+        return mass_region, tagline
+
+    def summoner_puuid(self, request_ref, summoner_name, region, db):
         request_url = "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}".format(
             request_ref, summoner_name, region
         )
@@ -62,15 +70,13 @@ class RiotAPI:
         puuid = response.json().get("puuid")
         return puuid
 
-    def get_summoner_information(self, summoner_name, request_region):
-        assert request_region in self.request_regions
-
+    def summoner_info(self, summoner_name, request_region):
+        assert request_region in self.regions
         request_url = (
             "https://{}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}".format(
                 request_region, summoner_name
             )
         )
-
         response = requests.get(request_url, headers=self.headers)
         if response.status_code != 200:
             print(
@@ -81,7 +87,7 @@ class RiotAPI:
             return None
         return response.json().get("puuid")
 
-    def get_champion_mastery(self, puuid, request_region):
+    def champion_mastery(self, puuid, region):
         """
         Retrieves the champion mastery information for a given summoner.
 
@@ -98,12 +104,11 @@ class RiotAPI:
         Returns:
         None. The function prints the champion mastery information to the console.
         """
-        assert request_region in self.request_regions
+        assert region in self.regions
 
         request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/{}".format(
-            request_region, puuid
+            region, puuid
         )
-
         response = requests.get(request_url, headers=self.headers)
         print("Request URL: {}".format(request_url))
         print("Response Status Code: {}".format(response.status_code))
@@ -115,9 +120,7 @@ class RiotAPI:
                     time.strftime("%Y-%m-%d %H:%M"), response.status_code
                 )
             )
-
         champion_df = pd.read_csv("data/champion_ids.csv")
-
         print(
             "{} Total champions played: {}".format(
                 time.strftime("%Y-%m-%d %H:%M"), len(response.json())
@@ -146,13 +149,13 @@ class RiotAPI:
                     i.get("tokensEarned"),
                 )
             )
+            return response.json()
 
-    def get_total_champion_mastery_score(self, puuid, request_region):
-        assert request_region in self.request_regions
+    def champion_mastery_total_score(self, puuid, region):
+        assert region in self.regions
         request_url = "https://{}.api.riotgames.com/lol/champion-mastery/v4/scores/by-puuid/{}".format(
-            request_region, puuid
+            region, puuid
         )
-
         response = requests.get(request_url, headers=self.headers)
         if response.status_code == 200:
             print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
@@ -162,15 +165,15 @@ class RiotAPI:
                     time.strftime("%Y-%m-%d %H:%M"), response.status_code
                 )
             )
+        return response.json()
 
-    def get_summoner_leagues(self, summonerId, region):
-        assert region in self.request_regions
+    def summoner_leagues(self, summonerId, region):
+        assert region in self.regions
         request_url = (
             "https://{}.api.riotgames.com/lol/league/v4/entries/by-summoner/{}".format(
                 region, summonerId
             )
         )
-
         response = requests.get(request_url, headers=self.headers)
         if response.status_code == 200:
             print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
@@ -180,7 +183,6 @@ class RiotAPI:
                     time.strftime("%Y-%m-%d %H:%M"), response.status_code
                 )
             )
-
         for i in response.json():
             if i.get("leaguePoints") != 100:
                 print(
@@ -212,8 +214,9 @@ class RiotAPI:
                         i.get("inactive"),
                     )
                 )
+        return response.json()
 
-    def get_match_ids(self, puuid, num_matches, queue_type, region):
+    def match_ids(self, puuid, num_matches, queue_type, region):
         logging.info(f"Getting match IDs for PUUID: {puuid}, Region: {region}")
         available_regions = ["europe", "americas", "asia"]
         if region not in available_regions:
@@ -225,19 +228,15 @@ class RiotAPI:
         if not 0 <= num_matches <= 990:
             logging.error(f"Invalid number of matches: {num_matches}")
             return []
-
-        returning_object = []
+        match_ids = []
         iterator = 0
         request_url = f"https://{region}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?type={queue_type}&start={iterator}&count={min(num_matches, 100)}"
-
         while num_matches > 0:
             logging.info(f"Request URL: {request_url}")
             response = requests.get(request_url, headers=self.headers)
             if response.status_code == 200:
                 matches = response.json()
-                returning_object.extend(
-                    [{"match_id": match_id} for match_id in matches]
-                )
+                match_ids.extend([{"match_id": match_id} for match_id in matches])
                 num_matches -= len(matches)
                 iterator += 100
                 if num_matches > 0:
@@ -247,11 +246,29 @@ class RiotAPI:
                     f"Request failed with status {response.status_code}: {response.text}"
                 )
                 break
+        logging.info(f"Retrieved {len(match_ids)} match IDs.")
+        return match_ids
 
-        logging.info(f"Retrieved {len(returning_object)} match IDs.")
-        return returning_object
+    def match_info(self, match_id, region):
+        available_regions = ["europe", "americas", "asia"]
+        assert region in available_regions
+        request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
+            region, match_id
+        )
+        print(match_id)
+        response = requests.get(request_url, headers=self.headers)
+        if response.status_code == 200:
+            pass
+        elif response.status_code == 429:
+            print(
+                "{} Request error (@get_match_info). HTTP code {}".format(
+                    time.strftime("%Y-%m-%d %H:%M"), response.status_code
+                )
+            )
+            return None
+        return response.json()
 
-    def get_match_timeline(self, match_id, region):
+    def match_timeline(self, match_id, region):
         available_regions = ["europe", "americas", "asia"]
         assert region in available_regions
         request_url = (
@@ -259,7 +276,6 @@ class RiotAPI:
                 region, match_id
             )
         )
-
         response = requests.get(request_url, headers=self.headers)
         if response.status_code == 200:
             print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
@@ -272,49 +288,8 @@ class RiotAPI:
             return None
         return response.json()
 
-    def get_match_info(self, match_id, region):
-        available_regions = ["europe", "americas", "asia"]
-        assert region in available_regions
-        request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
-            region, match_id
-        )
-        print(match_id)
-
-        response = requests.get(request_url, headers=self.headers)
-
-        rate_limited = 0
-        if response.status_code == 200:
-            pass
-        elif response.status_code == 429:
-            rate_limited = 1
-        else:
-            print(
-                "{} Request error (@get_match_info). HTTP code {}".format(
-                    time.strftime("%Y-%m-%d %H:%M"), response.status_code
-                )
-            )
-            return None
-        return rate_limited, response.json()
-
-    def determine_overall_region(self, region):
-        overall_region = str()
-        tagline = str()
-        if region in ["euw1", "eun1", "ru", "tr1"]:
-            overall_region = "europe"
-        elif region in ["br1", "la1", "la2", "na1"]:
-            overall_region = "americas"
-        else:
-            overall_region = "asia"
-        if region in ["br1", "jp1", "kr", "la1", "la2", "ru", "na1", "tr1", "oc1"]:
-            tagline = region.upper()
-        elif region == "euw1":
-            tagline = "EUW"
-        elif region == "eun1":
-            tagline = "EUNE"
-        return overall_region, tagline
-
-    def get_top_players(self, region, queue, db):
-        assert region in self.request_regions
+    def top_players(self, region, queue, db):
+        assert region in self.regions
         assert queue in ["RANKED_SOLO_5x5"]
         total_users_to_insert = list()
         request_urls = [
@@ -370,7 +345,7 @@ class RiotAPI:
         )
 
         insert_query = """
-    INSERT INTO player_table (summonerId, summonerName, leaguePoints, rank, wins, losses, veteran, inactive, freshBlood, hotStreak, tier, request_region, queue)
+    INSERT INTO top_players (summonerId, summonerName, leaguePoints, rank, wins, losses, veteran, inactive, freshBlood, hotStreak, tier, request_region, queue)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (summonerId) DO NOTHING
     """
@@ -398,21 +373,8 @@ class RiotAPI:
             except psycopg2.IntegrityError:
                 continue
 
-        # for x in total_users_to_insert:
-        #     df = pd.DataFrame(x, index=[0])
-
-        #     try:
-        #         df.to_sql("player_table", db.get_connection(), if_exists="append", index=False, method="multi")
-        #         print("[INS]: {}".format(x["summonerName"]))
-        #     except ValueError:
-        #         print("[DUP]: {}".format(x["summonerName"]))
-        #         continue
-        #     except psycopg2.IntegrityError:
-        #         print("[DUP]: {}".format(x["summonerName"]))
-        #         continue
-
     def extract_matches(self, region, match_id, db, key):
-        assert region in self.request_regions
+        assert region in self.regions
         request_url = "https://{}.api.riotgames.com/lol/match/v5/matches/{}".format(
             region, match_id
         )
@@ -427,7 +389,6 @@ class RiotAPI:
             return
         o_version = response.json().get("info").get("gameVersion")
         o_participants = response.json().get("info").get("participants")
-        o_teams = response.json().get("info").get("teams")
 
         matchups = {
             "top": list(),
@@ -484,15 +445,13 @@ class RiotAPI:
                         region,
                     )
                 )
-
         db.execute("UPDATE match SET processed_1v1 = 1 WHERE key = ?", (key,))
-
         return response.json()
 
     def player_list(self):
-        for x in self.request_regions:
+        for x in self.regions:
             for y in ["RANKED_SOLO_5x5"]:
-                self.get_top_players(x, y, self.db)
+                self.top_players(x, y, self.db)
 
     def match_list(self):
         query = "SELECT * FROM player_table"
@@ -510,13 +469,13 @@ class RiotAPI:
                     time.strftime("%Y-%m-%d %H:%M"), current_summoner, request_region
                 )
             )
-            current_summoner_puuid = self.get_summoner_information(
+            current_summoner_puuid = self.summoner_info(
                 current_summoner, request_region.lower()
             )
             if current_summoner_puuid is None:
                 continue
-            overall_region = self.determine_overall_region(request_region.lower())[0]
-            z_match_ids = self.get_match_ids(
+            overall_region = self.mass_region(request_region.lower())[0]
+            z_match_ids = self.match_ids(
                 current_summoner_puuid, 990, "ranked", overall_region
             )
 
@@ -568,9 +527,7 @@ class RiotAPI:
         query = "SELECT * FROM match_table WHERE processed_1v1 != 1"
         all_match_ids = cursor.execute(query).fetchall()
         for x in all_match_ids:
-            overall_region, tagline = self.determine_overall_region(
-                x[0].split("_")[0].lower()
-            )
+            overall_region, tagline = self.mass_region(x[0].split("_")[0].lower())
             print(
                 "{} Overall Region {} detected".format(
                     time.strftime("%Y-%m-%d %H:%M"), overall_region
@@ -598,15 +555,13 @@ class RiotAPI:
         query = "SELECT * FROM match WHERE processed_5v5 != 1"
         all_match_ids = db.execute(query).fetchall()
         for x in all_match_ids:
-            overall_region, tagline = self.determine_overall_region(
-                x[0].split("_")[0].lower()
-            )
+            overall_region, tagline = self.mass_region(x[0].split("_")[0].lower())
             print(
                 "{} Overall Region {} detected".format(
                     time.strftime("%Y-%m-%d %H:%M"), overall_region
                 )
             )
-            match_detail = self.get_match_timeline(x[0], overall_region)
+            match_detail = self.match_timeline(x[0], overall_region)
             if match_detail:
                 try:
                     db.execute("INSERT INTO match_detail VALUES (?)", (match_detail,))

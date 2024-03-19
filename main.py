@@ -6,6 +6,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
+from constants import REGIONS
 from database_pg import Database, ProcessPerformance
 from extract_pg import main as extract_main
 from riot_api import RiotAPI
@@ -36,8 +37,14 @@ db = Database(os.getenv("DATABASE_URL")).get_connection()
 
 
 # API endpoints
+@app.on_event("startup")
+async def startup_event():
+    global riot_api
+    riot_api = RiotAPI(db)
+
+
 @app.get("/summoner/{summoner_name}")
-async def get_summoner_information(summoner_name: str, region: str = "na1"):
+async def get_summoner_info(summoner_name: str, region: str = "na1"):
     """
     Retrieves summoner information based on the summoner name and region.
 
@@ -48,9 +55,10 @@ async def get_summoner_information(summoner_name: str, region: str = "na1"):
     Returns:
         dict: The summoner information.
     """
+    if region not in REGIONS:
+        return {"error": "Invalid region"}
     try:
-        riot_api = RiotAPI(db)
-        summoner_info = riot_api.get_summoner_information(summoner_name, region)
+        summoner_info = riot_api.summoner_info(summoner_name, region)
         return summoner_info
     except Exception as e:
         return {"error": f"Error retrieving summoner information: {e}"}
@@ -70,14 +78,14 @@ async def get_champion_mastery(puuid: str, region: str = "na1"):
     """
     try:
         riot_api = RiotAPI(db)
-        champion_mastery = riot_api.get_champion_mastery(puuid, region)
+        champion_mastery = riot_api.champion_mastery(puuid, region)
         return champion_mastery
     except Exception as e:
         return {"error": f"Error retrieving champion mastery: {e}"}
 
 
 @app.get("/champion_mastery/scores/{puuid}")
-async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
+async def get_champion_mastery_top_score(puuid: str, region: str = "na1"):
     """
     Retrieves the total champion mastery score for a given player.
 
@@ -90,10 +98,8 @@ async def get_total_champion_mastery_score(puuid: str, region: str = "na1"):
     """
     try:
         riot_api = RiotAPI(db)
-        total_champion_mastery_score = riot_api.get_total_champion_mastery_score(
-            puuid, region
-        )
-        return total_champion_mastery_score
+        champion_mastery_score = riot_api.champion_mastery_total_score(puuid, region)
+        return champion_mastery_score
     except Exception as e:
         return {"error": f"Error retrieving total champion mastery score: {e}"}
 
@@ -112,13 +118,13 @@ async def get_summoner_leagues(summonerId: str, region: str = "na1"):
     """
     try:
         riot_api = RiotAPI(db)
-        summoner_leagues = riot_api.get_summoner_leagues(summonerId, region)
+        summoner_leagues = riot_api.summoner_leagues(summonerId, region)
         return summoner_leagues
     except Exception as e:
         return {"error": f"Error retrieving summoner leagues: {e}"}
 
 
-@app.get("/match_list/{puuid}")
+@app.get("/summoner/match_list/{puuid}")
 async def get_match_list(
     puuid: str,
     num_matches: int = 10,
@@ -133,7 +139,7 @@ async def get_match_list(
     )
     try:
         riot_api = RiotAPI(db)
-        match_list = riot_api.get_match_ids(puuid, num_matches, queue_type, region)
+        match_list = riot_api.match_ids(puuid, num_matches, queue_type, region)
         if not match_list:
             logging.warning("Received empty match list.")
         return match_list
@@ -162,7 +168,7 @@ async def get_match_detail(match_id: str, db):
 
 
 @app.post("/performance")
-async def calculate_performance(match_id: str, db):
+async def calculate_performance(match_id: str):
     """
     Calculates player performance based on match details.
 
@@ -174,10 +180,8 @@ async def calculate_performance(match_id: str, db):
         dict: The calculated performance data.
     """
     try:
-        match_detail = (
-            db.cursor()
-            .execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,))
-            .fetchone()
+        match_detail = db.cursor().execute(
+            "SELECT * FROM match_detail WHERE match_id = ?", (match_id,)
         )
         if match_detail:
             performance_calculator = ProcessPerformance(db)
@@ -229,7 +233,7 @@ async def plugin_manifest():
     return Response(content=json_content, media_type="application/json")
 
 
-@app.get("/public/lol-openapi.yaml")
+@app.get("/openapi.yaml")
 async def openapi_spec(request: Request):
     host = request.client.host if request.client else "localhost"
     with open("openapi.yaml", "r") as f:

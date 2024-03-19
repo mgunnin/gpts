@@ -44,7 +44,7 @@ class Database:
 
     def run_init_db(self):
         conn = self.get_connection()
-        player_table_def = """
+        player_table = """
             CREATE TABLE IF NOT EXISTS player_table (
                 summonerId TEXT PRIMARY KEY,
                 summonerName TEXT,
@@ -62,13 +62,13 @@ class Database:
             )
         """
 
-        match_table_def = """
+        match_table = """
             CREATE TABLE IF NOT EXISTS match_table (
                 match_id TEXT PRIMARY KEY
             )
         """
 
-        performance_table_def = """
+        performance_table = """
             CREATE TABLE IF NOT EXISTS performance_table (
                 assists INTEGER,
                 baronKills INTEGER,
@@ -185,7 +185,7 @@ class Database:
             )
         """
 
-        match_detail_def = """
+        match_detail = """
             CREATE TABLE IF NOT EXISTS match_detail (
                 match_id TEXT PRIMARY KEY,
                 game_duration INTEGER,
@@ -227,11 +227,29 @@ class Database:
             )
         """
 
+        top_players = """
+            CREATE TABLE IF NOT EXISTS top_players (
+                summonerName TEXT,
+                region TEXT,
+                tier TEXT,
+                division TEXT,
+                leaguePoints INTEGER,
+                wins INTEGER,
+                losses INTEGER,
+                veteran BOOLEAN,
+                inactive BOOLEAN,
+                freshBlood BOOLEAN,
+                hotStreak BOOLEAN,
+                queue TEXT
+            )
+        """
+
         # Execute table creation queries
-        self.execute(player_table_def)
-        self.execute(match_table_def)
-        self.execute(performance_table_def)
-        self.execute(match_detail_def)
+        self.execute(player_table)
+        self.execute(match_table)
+        self.execute(performance_table)
+        self.execute(match_detail)
+        self.execute(top_players)
 
         conn.commit()
         conn.close()
