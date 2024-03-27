@@ -20,7 +20,7 @@ app = FastAPI(
     description="A FastAPI application for the Esports Playmaker plugin.",
     version="0.1.0",
     servers=[
-        {"url": "http://127.0.0.1:8000/"},
+        {"url": "http://0.0.0.0:8000/"},
         {"url": "https://lacralabs.replit.app"},
     ],
 )
@@ -64,6 +64,26 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
         return {"error": f"Error retrieving summoner information: {e}"}
 
 
+@app.get("/summoner/leagues/{summonerId}")
+async def get_summoner_leagues(summonerId: str, region: str = "na1"):
+    """
+    Retrieves a list of league information for the given summoner ID.
+
+    Args:
+        summonerId (str): The summoner ID.
+        region (str, optional): The region of the summoner. Defaults to "na1".
+
+    Returns:
+        dict: A dictionary containing the league information for the given summoner ID.
+    """
+    try:
+        riot_api = RiotAPI(db)
+        summoner_leagues = riot_api.summoner_leagues(summonerId, region)
+        return summoner_leagues
+    except Exception as e:
+        return {"error": f"Error retrieving summoner leagues: {e}"}
+
+
 @app.get("/champion_mastery/{puuid}")
 async def get_champion_mastery(puuid: str, region: str = "na1"):
     """
@@ -84,8 +104,8 @@ async def get_champion_mastery(puuid: str, region: str = "na1"):
         return {"error": f"Error retrieving champion mastery: {e}"}
 
 
-@app.get("/champion_mastery/scores/{puuid}")
-async def get_champion_mastery_top_score(puuid: str, region: str = "na1"):
+@app.get("/summoner/champion_mastery/scores/{puuid}")
+async def get_champion_mastery_total_score(puuid: str, region: str = "na1"):
     """
     Retrieves the total champion mastery score for a given player.
 
@@ -102,26 +122,6 @@ async def get_champion_mastery_top_score(puuid: str, region: str = "na1"):
         return champion_mastery_score
     except Exception as e:
         return {"error": f"Error retrieving total champion mastery score: {e}"}
-
-
-@app.get("/summoner/leagues/{summonerId}")
-async def get_summoner_leagues(summonerId: str, region: str = "na1"):
-    """
-    Retrieves a list of league information for the given summoner ID.
-
-    Args:
-        summonerId (str): The summoner ID.
-        region (str, optional): The region of the summoner. Defaults to "na1".
-
-    Returns:
-        dict: A dictionary containing the league information for the given summoner ID.
-    """
-    try:
-        riot_api = RiotAPI(db)
-        summoner_leagues = riot_api.summoner_leagues(summonerId, region)
-        return summoner_leagues
-    except Exception as e:
-        return {"error": f"Error retrieving summoner leagues: {e}"}
 
 
 @app.get("/summoner/match_list/{puuid}")
@@ -148,8 +148,27 @@ async def get_match_list(
         return {"error": f"Error retrieving match list: {e}"}
 
 
-@app.get("/match_detail/{match_id}")
+@app.get("/match/detail/{match_id}")
 async def get_match_detail(match_id: str, db):
+    """
+    Retrieves the match detail for a given match ID.
+    """
+    try:
+        match_detail = (
+            db.cursor()
+            .execute("SELECT * FROM match_detail WHERE match_id = ?", (match_id,))
+            .fetchone()
+        )
+        if match_detail is not None:
+            return match_detail
+        else:
+            return {"error": "Match not found"}
+    except Exception as e:
+        return {"error": f"Error retrieving match detail: {e}"}
+
+
+@app.get("/match/timeline/{match_id}")
+async def get_match_timeline(match_id: str, db):
     """
     Retrieves the match detail for a given match ID.
     """
@@ -243,4 +262,4 @@ async def openapi_spec(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

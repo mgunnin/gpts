@@ -2,11 +2,11 @@
 
 ## GPT/Cursor
 
-We are embarking on the development of a sophisticated application designed to leverage the Riot Games API for in-depth data analysis and visualization related to League of Legends. The core of this application will be built around a FastAPI web server, which will serve as the backbone for handling requests and delivering data. This server will need to implement CORS middleware to support cross-origin requests effectively.
+We are embarking on the development of a sophisticated application designed to leverage the Riot Games API for in-depth data analysis and visualization related to League of Legends. The core of this application will be built around a FastAPI web server, which will serve as the backbone for handling requests and delivering data. This server will need to implement CORS middleware to support cross-origin requests effectively. The application should use a 3rd party Riot Games API wrapper like Cassiopeia or Pulsefire
 
 The application will interact with a PostgreSQL database, requiring a robust interface for seamless connection management, query execution, and dynamic table creation. This database will store a wide array of data, including summoner profiles, champion mastery details, league information, and comprehensive match analytics.
 
-A critical component of our application will be the Riot API Wrapper, designed to encapsulate all interactions with the Riot Games API. This wrapper will fetch various data points such as summoner information, champion mastery, match IDs, and detailed match timelines. It will also be responsible for populating our database with top player information across different regions and queues, ensuring our data remains rich and relevant.
+A critical component of our application will be the Riot API Wrapper using a third party wrapper of your choice, designed to encapsulate all interactions with the Riot Games API. This wrapper will fetch various data points such as summoner information, champion mastery, match IDs, and detailed match timelines. It will also be responsible for populating our database with top player information across different regions and queues, ensuring our data remains rich and relevant.
 
 To facilitate data extraction and mining, we will develop a standalone script capable of running various operations to populate our database with player lists, match lists, and detailed match analyses. This script will leverage both the RiotAPI class for data fetching and the Database class for data storage.
 

@@ -9,3 +9,5 @@
 /tools/gpt-crawler
 __pycache__
 /.local
+/wandb
+/.vscode

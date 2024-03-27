@@ -45,7 +45,7 @@ class RiotAPI:
             tagline = "EUNE"
         return mass_region, tagline
 
-    def summoner_puuid(self, request_ref, summoner_name, region, db):
+    def account_riot_id(self, request_ref, summoner_name, region, db):
         request_url = "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}".format(
             request_ref, summoner_name, region
         )
@@ -85,7 +85,56 @@ class RiotAPI:
                 )
             )
             return None
-        return response.json().get("puuid")
+        return response.json()
+
+    def summoner_leagues(self, summonerId, region):
+        assert region in self.regions
+        request_url = (
+            "https://{}.api.riotgames.com/lol/league/v4/entries/by-summoner/{}".format(
+                region, summonerId
+            )
+        )
+        response = requests.get(request_url, headers=self.headers)
+        if response.status_code == 200:
+            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
+        else:
+            print(
+                "{} Request error (@get_summoner_leagues). HTTP code {}".format(
+                    time.strftime("%Y-%m-%d %H:%M"), response.status_code
+                )
+            )
+        for i in response.json():
+            if i.get("leaguePoints") != 100:
+                print(
+                    "{} Queue type: {} | Rank: {} {} {} LP | Winrate: {}% | Streak {} | >100 games {} | Inactive {}".format(
+                        time.strftime("%Y-%m-%d %H:%M"),
+                        i.get("queueType"),
+                        i.get("tier"),
+                        i.get("rank"),
+                        i.get("leaguePoints"),
+                        (i.get("wins") / (i.get("losses") + i.get("wins"))) * 100,
+                        i.get("hotStreak"),
+                        i.get("veteran"),
+                        i.get("inactive"),
+                    )
+                )
+            else:
+                print(
+                    "{} Queue type: {} | Rank: {} {} {} LP - Promo standings: {}/{} | Winrate: {}% | Streak {} | >100 games {} | Inactive {}".format(
+                        time.strftime("%Y-%m-%d %H:%M"),
+                        i.get("queueType"),
+                        i.get("tier"),
+                        i.get("rank"),
+                        i.get("leaguePoints"),
+                        i.get("miniSeries").get("wins"),
+                        i.get("miniSeries").get("losses"),
+                        (i.get("wins") / (i.get("losses") + i.get("wins"))) * 100,
+                        i.get("hotStreak"),
+                        i.get("veteran"),
+                        i.get("inactive"),
+                    )
+                )
+        return response.json()
 
     def champion_mastery(self, puuid, region):
         """
@@ -167,55 +216,6 @@ class RiotAPI:
             )
         return response.json()
 
-    def summoner_leagues(self, summonerId, region):
-        assert region in self.regions
-        request_url = (
-            "https://{}.api.riotgames.com/lol/league/v4/entries/by-summoner/{}".format(
-                region, summonerId
-            )
-        )
-        response = requests.get(request_url, headers=self.headers)
-        if response.status_code == 200:
-            print("{} {}".format(time.strftime("%Y-%m-%d %H:%M"), response.json()))
-        else:
-            print(
-                "{} Request error (@get_summoner_leagues). HTTP code {}".format(
-                    time.strftime("%Y-%m-%d %H:%M"), response.status_code
-                )
-            )
-        for i in response.json():
-            if i.get("leaguePoints") != 100:
-                print(
-                    "{} Queue type: {} | Rank: {} {} {} LP | Winrate: {}% | Streak {} | >100 games {} | Inactive {}".format(
-                        time.strftime("%Y-%m-%d %H:%M"),
-                        i.get("queueType"),
-                        i.get("tier"),
-                        i.get("rank"),
-                        i.get("leaguePoints"),
-                        (i.get("wins") / (i.get("losses") + i.get("wins"))) * 100,
-                        i.get("hotStreak"),
-                        i.get("veteran"),
-                        i.get("inactive"),
-                    )
-                )
-            else:
-                print(
-                    "{} Queue type: {} | Rank: {} {} {} LP - Promo standings: {}/{} | Winrate: {}% | Streak {} | >100 games {} | Inactive {}".format(
-                        time.strftime("%Y-%m-%d %H:%M"),
-                        i.get("queueType"),
-                        i.get("tier"),
-                        i.get("rank"),
-                        i.get("leaguePoints"),
-                        i.get("miniSeries").get("wins"),
-                        i.get("miniSeries").get("losses"),
-                        (i.get("wins") / (i.get("losses") + i.get("wins"))) * 100,
-                        i.get("hotStreak"),
-                        i.get("veteran"),
-                        i.get("inactive"),
-                    )
-                )
-        return response.json()
-
     def match_ids(self, puuid, num_matches, queue_type, region):
         logging.info(f"Getting match IDs for PUUID: {puuid}, Region: {region}")
         available_regions = ["europe", "americas", "asia"]
@@ -269,8 +269,8 @@ class RiotAPI:
         return response.json()
 
     def match_timeline(self, match_id, region):
-        available_regions = ["europe", "americas", "asia"]
-        assert region in available_regions
+        mass_regions = ["europe", "americas", "asia"]
+        assert region in mass_regions
         request_url = (
             "https://{}.api.riotgames.com/lol/match/v5/matches/{}/timeline".format(
                 region, match_id
