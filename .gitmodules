@@ -1,0 +1,3 @@
+[submodule "riotapi-schema"]
+	path = riotapi-schema
+	url = git@github.com:MingweiSamuel/riotapi-schema.git
