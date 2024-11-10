@@ -49,7 +49,7 @@ champion_df.set_index("champion_id", inplace=True)
 
 print(champion_df)
 
-final_csv_path = "../../data/champion_ids.csv"
+final_csv_path = "data/champion_ids.csv"
 
 if os.path.exists(final_csv_path):
     champion_df.to_csv(final_csv_path)

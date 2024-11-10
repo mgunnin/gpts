@@ -345,9 +345,9 @@ class RiotAPI:
         )
 
         insert_query = """
-    INSERT INTO top_players (summonerId, summonerName, leaguePoints, rank, wins, losses, veteran, inactive, freshBlood, hotStreak, tier, request_region, queue)
+    INSERT INTO top_players (summoner_id, summoner_name, league_points, rank, wins, losses, veteran, inactive, fresh_blood, hot_streak, tier, request_region, queue)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (summonerId) DO NOTHING
+    ON CONFLICT (summoner_id) DO NOTHING
     """
         for player in total_users_to_insert:
             try:
@@ -404,15 +404,15 @@ class RiotAPI:
                         "champion": x.get("championName"),
                         "assists": x.get("assists"),
                         "deaths": x.get("deaths"),
-                        "goldEarned": x.get("goldEarned"),
+                        "gold_earned": x.get("goldEarned"),
                         "kills": x.get("kills"),
                         "puuid": x.get("puuid"),
-                        "summonerName": x.get("summonerName"),
-                        "totalDamageDealtToChampions": x.get(
+                        "summoner_name": x.get("summonerName"),
+                        "total_damage_dealt_to_champions": x.get(
                             "totalDamageDealtToChampions"
                         ),
-                        "totalMinionsKilled": x.get("totalMinionsKilled"),
-                        "visionScore": x.get("visionScore"),
+                        "total_minions_killed": x.get("totalMinionsKilled"),
+                        "vision_score": x.get("visionScore"),
                         "win": x.get("win"),
                     }
                 )

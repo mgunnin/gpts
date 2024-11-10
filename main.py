@@ -64,13 +64,13 @@ async def get_summoner_info(summoner_name: str, region: str = "na1"):
         return {"error": f"Error retrieving summoner information: {e}"}
 
 
-@app.get("/summoner/leagues/{summonerId}")
-async def get_summoner_leagues(summonerId: str, region: str = "na1"):
+@app.get("/summoner/leagues/{summoner_id}")
+async def get_summoner_leagues(summoner_id: str, region: str = "na1"):
     """
     Retrieves a list of league information for the given summoner ID.
 
     Args:
-        summonerId (str): The summoner ID.
+        summoner_id (str): The summoner ID.
         region (str, optional): The region of the summoner. Defaults to "na1".
 
     Returns:
@@ -78,7 +78,7 @@ async def get_summoner_leagues(summonerId: str, region: str = "na1"):
     """
     try:
         riot_api = RiotAPI(db)
-        summoner_leagues = riot_api.summoner_leagues(summonerId, region)
+        summoner_leagues = riot_api.summoner_leagues(summoner_id, region)
         return summoner_leagues
     except Exception as e:
         return {"error": f"Error retrieving summoner leagues: {e}"}
