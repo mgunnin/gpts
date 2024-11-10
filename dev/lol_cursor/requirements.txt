@@ -1,0 +1,6 @@
+fastapi
+numpy
+requests
+scikit-learn
+sqlalchemy
+uvicorn

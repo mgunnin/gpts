@@ -1,0 +1,10 @@
+aiohttp
+asyncpg
+cassiopeia
+fastapi
+pandas
+pytest
+pytest-asyncio
+python-dotenv
+sqlalchemy
+uvicorn
